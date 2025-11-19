@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="hero">
+    <h1>Welcome to CHSG Multimodal Inference</h1>
+    <p>Harnessing AI to safeguard communities and ensure access to clean water.</p>
+</section>
+
+<!-- Prediction Breadcrumb -->
+<section class="predictions">
+    <h2>Predictions</h2>
+    <nav class="breadcrumb">
+        <a href="/predict/combined">Local Prediction (Combined)</a> ›
+        <a href="/predict/ndhs">National Prediction (NDHS)</a> ›
+        <a href="/dashboard">Dashboard</a>
+    </nav>
+</section>
+
+<!-- About Us -->
+<section>
+    <h2>About Us</h2>
+    <p>
+        At CHSG, we integrate text, voice, image, and structured data analytics to deliver predictive insights 
+        that empower governments, NGOs, and communities to act swiftly against waterborne diseases.
+    </p>
+</section>
+
+<!-- Mission -->
+<section>
+    <h2>Our Mission</h2>
+    <p>
+        To combine cutting-edge machine learning models with real-world data sources to predict, monitor, 
+        and mitigate risks related to water quality, sanitation, and disease outbreaks.
+    </p>
+</section>
+
+<!-- Vision -->
+<section>
+    <h2>Our Vision</h2>
+    <p>
+        To become the leading AI-driven public health intelligence platform in Africa and beyond, 
+        enabling proactive risk detection and fostering resilient communities.
+    </p>
+</section>
+{% endblock %}

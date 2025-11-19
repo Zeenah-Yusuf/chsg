@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Voice Reports</h1>
+<p>Select your language, click start, and speak your report. The system will transcribe and send it for prediction.</p>
+
+<div class="voice-controls">
+  <label for="langSelect">Recognition Language:</label>
+  <select id="langSelect">
+    <option value="en-NG">English (Nigeria)</option>
+    <option value="yo-NG">Yoruba</option>
+    <option value="ig-NG">Igbo</option>
+    <option value="ha-NG">Hausa</option>
+  </select>
+</div>
+
+<div class="voice-controls">
+  <button id="startBtn">🎤 Start Recording</button>
+  <button id="stopBtn" disabled>⏹ Stop Recording</button>
+</div>
+
+<div class="transcript-box">
+  <h3>Transcript:</h3>
+  <textarea id="transcript" rows="5" cols="60" readonly></textarea>
+</div>
+
+<button id="submitBtn" disabled>Submit Report</button>
+
+<script>
+let recognition;
+let transcriptText = "";
+
+// Initialize recognition
+function initRecognition(lang) {
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  recognition = new SpeechRecognition();
+  recognition.continuous = true;
+  recognition.interimResults = true;
+  recognition.lang = lang;
+
+  recognition.onresult = (event) => {
+    transcriptText = "";
+    for (let i = event.resultIndex; i < event.results.length; ++i) {
+      transcriptText += event.results[i][0].transcript;
+    }
+    document.getElementById("transcript").value = transcriptText;
+    document.getElementById("submitBtn").disabled = transcriptText.trim().length === 0;
+  };
+
+  recognition.onerror = (event) => {
+    console.error("Speech recognition error:", event.error);
+    showToast("❌ Voice recognition error: " + event.error, "error");
+  };
+}
+
+// Start recording
+document.getElementById("startBtn").addEventListener("click", () => {
+  const lang = document.getElementById("langSelect").value;
+  initRecognition(lang);
+  recognition.start();
+  showToast(" Recording started (" + lang + "). Speak now...", "info");
+  document.getElementById("startBtn").disabled = true;
+  document.getElementById("stopBtn").disabled = false;
+});
+
+// Stop recording
+document.getElementById("stopBtn").addEventListener("click", () => {
+  if (recognition) {
+    recognition.stop();
+    showToast("⏹ Recording stopped.", "info");
+    document.getElementById("startBtn").disabled = false;
+    document.getElementById("stopBtn").disabled = true;
+  }
+});
+
+// Submit transcript
+document.getElementById("submitBtn").addEventListener("click", async () => {
+  const payload = {
+    text: transcriptText,
+    lat: document.getElementById("latInput")?.value || 0.0,
+    lon: document.getElementById("lonInput")?.value || 0.0,
+    source: "voice"
+  };
+
+  try {
+    const res = await fetch("/ingest/voice", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+
+    if (!res.ok) throw new Error("Failed to submit voice report");
+    const result = await res.json();
+    showToast(" Voice ingested! Risk Score: " + result.record.risk_score);
+
+    const table = document.querySelector(".risk-table tbody");
+    if (table) {
+      const r = result.record;
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td>${r.date}</td>
+        <td>${r.lat}</td>
+        <td>${r.lon}</td>
+        <td>${r.category}</td>
+        <td>${r.is_risky ? "Yes" : "No"}</td>
+        <td>${r.risk_score}</td>
+        <td>${r.source}</td>
+      `;
+      table.prepend(row);
+    }
+  } catch (err) {
+    console.error(err);
+    showToast("❌ Failed to submit voice report", "error");
+  }
+});
+</script>
+{% endblock %}

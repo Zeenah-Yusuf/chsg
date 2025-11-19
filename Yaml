@@ -1,0 +1,45 @@
+version: "3.9"
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: dockerfile/Dockerfile
+    container_name: chsg_api
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./models:/app/models
+      - ./schemas:/app/schemas
+      - ./api:/app/api
+      - ./data:/app/data
+    environment:
+      - USE_ALERT_STUB=true
+      - ALERT_RECIPIENT=whatsapp:+2348012345678
+      - TWILIO_ACCOUNT_SID=${TWILIO_ACCOUNT_SID}
+      - TWILIO_AUTH_TOKEN=${TWILIO_AUTH_TOKEN}
+      - TWILIO_WHATSAPP_FROM=${TWILIO_WHATSAPP_FROM}
+
+  dashboard:
+    build:
+      context: .
+      dockerfile: dockerfile/Dashboard.Dockerfile
+    container_name: chsg_dashboard
+    ports:
+      - "8501:8501"
+    volumes:
+      - ./dashboard:/app/dashboard
+      - ./data:/app/data
+    depends_on:
+      - api
+
+  jobs:
+    build:
+      context: .
+      dockerfile: dockerfile/Jobs.Dockerfile   # separate Dockerfile for jobs
+    container_name: chsg_jobs
+    volumes:
+      - ./jobs:/app/jobs
+      - ./data:/app/data
+    depends_on:
+      - api

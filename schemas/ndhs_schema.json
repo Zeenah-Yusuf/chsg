@@ -1,0 +1,389 @@
+{
+  "properties": {
+    "Improved water source": {
+      "type": "number"
+    },
+    "Water piped into dwelling": {
+      "type": "number"
+    },
+    "Water piped into yard/plot": {
+      "type": "number"
+    },
+    "Public tap/standpipe": {
+      "type": "number"
+    },
+    "Water piped to neighbor": {
+      "type": "number"
+    },
+    "Tubewell/borehole": {
+      "type": "number"
+    },
+    "Protected well": {
+      "type": "number"
+    },
+    "Protected spring": {
+      "type": "number"
+    },
+    "Rainwater": {
+      "type": "number"
+    },
+    " Bottled water/demi john": {
+      "type": "number"
+    },
+    "Unimproved water source": {
+      "type": "number"
+    },
+    "Unprotected well water": {
+      "type": "number"
+    },
+    "Unprotected spring": {
+      "type": "number"
+    },
+    "Tanker truck": {
+      "type": "number"
+    },
+    "Cart with tank": {
+      "type": "number"
+    },
+    "Sachet water": {
+      "type": "number"
+    },
+    "Unimproved bottled water": {
+      "type": "number"
+    },
+    "Surface water": {
+      "type": "number"
+    },
+    "Other water source": {
+      "type": "number"
+    },
+    "Improved, non-shared toilet facilities": {
+      "type": "number"
+    },
+    "Flush or pour flush toilet to a piped sewer system": {
+      "type": "number"
+    },
+    "Flush or pour flush toilet to a septic tank": {
+      "type": "number"
+    },
+    "Flush or pour flush toilet to a pit latrine": {
+      "type": "number"
+    },
+    "Ventilated improved pit latrine (VIP)": {
+      "type": "number"
+    },
+    "Pit latrine with a slab": {
+      "type": "number"
+    },
+    "Composting toilet": {
+      "type": "number"
+    },
+    "Shared improved toilet facility": {
+      "type": "number"
+    },
+    "Shared flush or pour flush toilets to piper sewer systems": {
+      "type": "number"
+    },
+    "Shared flush or pour flush toilets to septic tank": {
+      "type": "number"
+    },
+    "Shared flush or pour flush toilets to a pit latrine": {
+      "type": "number"
+    },
+    "Shared ventilated improved pit latrine (VIP)": {
+      "type": "number"
+    },
+    "Shared pit latrine with a slab": {
+      "type": "number"
+    },
+    "Shared composting toilet": {
+      "type": "number"
+    },
+    "Unimproved toilet facility": {
+      "type": "number"
+    },
+    "Flush or pour flush toilet not to a sewer, septic tank or pit latrine": {
+      "type": "number"
+    },
+    "Pit latrine without a slab or an open pit": {
+      "type": "number"
+    },
+    "Bucket toilet": {
+      "type": "number"
+    },
+    "Hanging toilet or hanging latrine": {
+      "type": "number"
+    },
+    "Using river/stream/sea/pond/lake": {
+      "type": "number"
+    },
+    "Open defecation": {
+      "type": "number"
+    },
+    "Other types of toilet facility": {
+      "type": "number"
+    },
+    "On the premises": {
+      "type": "number"
+    },
+    "Less than 30 minutes away round trip": {
+      "type": "number"
+    },
+    "30 minutes or longer away round trip": {
+      "type": "number"
+    },
+    "No electricity": {
+      "type": "number"
+    },
+    "Households possessing a bicycle": {
+      "type": "number"
+    },
+    "Households possessing an animal drawn cart": {
+      "type": "number"
+    },
+    "Households possessing a motorcycle": {
+      "type": "number"
+    },
+    "Households possessing a private car": {
+      "type": "number"
+    },
+    "Households possessing a boat with a motor": {
+      "type": "number"
+    },
+    "Handwashing was a fixed place": {
+      "type": "number"
+    },
+    "Handwashing was mobile": {
+      "type": "number"
+    },
+    "Total": {
+      "type": "number"
+    },
+    "Getting permission to go for treatment": {
+      "type": "number"
+    },
+    "Getting money for treatment": {
+      "type": "number"
+    },
+    "Distance to health facility": {
+      "type": "number"
+    },
+    "Not wanting to go alone": {
+      "type": "number"
+    },
+    "Any of the specified problems": {
+      "type": "number"
+    },
+    "Adolescents 10-19_Female": {
+      "type": "number"
+    },
+    "Adolescents 10-19_Male": {
+      "type": "number"
+    },
+    "Adolescents 10-19_Total": {
+      "type": "number"
+    },
+    "Adult population 18+_Female": {
+      "type": "number"
+    },
+    "Adult population 18+_Male": {
+      "type": "number"
+    },
+    "Adult population 18+_Total": {
+      "type": "number"
+    },
+    "Child population 0-17_Female": {
+      "type": "number"
+    },
+    "Child population 0-17_Male": {
+      "type": "number"
+    },
+    "Child population 0-17_Total": {
+      "type": "number"
+    },
+    "Dependency age group 0-14_Female": {
+      "type": "number"
+    },
+    "Dependency age group 0-14_Male": {
+      "type": "number"
+    },
+    "Dependency age group 0-14_Total": {
+      "type": "number"
+    },
+    "Dependency age group 15-64_Female": {
+      "type": "number"
+    },
+    "Dependency age group 15-64_Male": {
+      "type": "number"
+    },
+    "Dependency age group 15-64_Total": {
+      "type": "number"
+    },
+    "Dependency age group 65+_Female": {
+      "type": "number"
+    },
+    "Dependency age group 65+_Male": {
+      "type": "number"
+    },
+    "Dependency age group 65+_Total": {
+      "type": "number"
+    },
+    "Percentage of population age 0-4_Female": {
+      "type": "number"
+    },
+    "Percentage of population age 0-4_Male": {
+      "type": "number"
+    },
+    "Percentage of population age 0-4_Total": {
+      "type": "number"
+    },
+    "Percentage of population age 10-14_Female": {
+      "type": "number"
+    },
+    "Percentage of population age 10-14_Male": {
+      "type": "number"
+    },
+    "Percentage of population age 10-14_Total": {
+      "type": "number"
+    },
+    "Percentage of population age 15-19_Female": {
+      "type": "number"
+    },
+    "Percentage of population age 15-19_Male": {
+      "type": "number"
+    },
+    "Percentage of population age 15-19_Total": {
+      "type": "number"
+    },
+    "Percentage of population age 20-24_Female": {
+      "type": "number"
+    },
+    "Percentage of population age 20-24_Male": {
+      "type": "number"
+    },
+    "Percentage of population age 20-24_Total": {
+      "type": "number"
+    },
+    "Percentage of population age 25-29_Female": {
+      "type": "number"
+    },
+    "Percentage of population age 25-29_Male": {
+      "type": "number"
+    },
+    "Percentage of population age 25-29_Total": {
+      "type": "number"
+    },
+    "Percentage of population age 30-34_Female": {
+      "type": "number"
+    },
+    "Percentage of population age 30-34_Male": {
+      "type": "number"
+    },
+    "Percentage of population age 30-34_Total": {
+      "type": "number"
+    },
+    "Percentage of population age 35-39_Female": {
+      "type": "number"
+    },
+    "Percentage of population age 35-39_Male": {
+      "type": "number"
+    },
+    "Percentage of population age 35-39_Total": {
+      "type": "number"
+    },
+    "Percentage of population age 40-44_Female": {
+      "type": "number"
+    },
+    "Percentage of population age 40-44_Male": {
+      "type": "number"
+    },
+    "Percentage of population age 40-44_Total": {
+      "type": "number"
+    },
+    "Percentage of population age 45-49_Female": {
+      "type": "number"
+    },
+    "Percentage of population age 45-49_Male": {
+      "type": "number"
+    },
+    "Percentage of population age 45-49_Total": {
+      "type": "number"
+    },
+    "Percentage of population age 5-9_Female": {
+      "type": "number"
+    },
+    "Percentage of population age 5-9_Male": {
+      "type": "number"
+    },
+    "Percentage of population age 5-9_Total": {
+      "type": "number"
+    },
+    "Percentage of population age 50-54_Female": {
+      "type": "number"
+    },
+    "Percentage of population age 50-54_Male": {
+      "type": "number"
+    },
+    "Percentage of population age 50-54_Total": {
+      "type": "number"
+    },
+    "Percentage of population age 55-59_Female": {
+      "type": "number"
+    },
+    "Percentage of population age 55-59_Male": {
+      "type": "number"
+    },
+    "Percentage of population age 55-59_Total": {
+      "type": "number"
+    },
+    "Percentage of population age 60-64_Female": {
+      "type": "number"
+    },
+    "Percentage of population age 60-64_Male": {
+      "type": "number"
+    },
+    "Percentage of population age 60-64_Total": {
+      "type": "number"
+    },
+    "Percentage of population age 65-69_Female": {
+      "type": "number"
+    },
+    "Percentage of population age 65-69_Male": {
+      "type": "number"
+    },
+    "Percentage of population age 65-69_Total": {
+      "type": "number"
+    },
+    "Percentage of population age 70-74_Female": {
+      "type": "number"
+    },
+    "Percentage of population age 70-74_Male": {
+      "type": "number"
+    },
+    "Percentage of population age 70-74_Total": {
+      "type": "number"
+    },
+    "Percentage of population age 75-79_Female": {
+      "type": "number"
+    },
+    "Percentage of population age 75-79_Male": {
+      "type": "number"
+    },
+    "Percentage of population age 75-79_Total": {
+      "type": "number"
+    },
+    "Percentage of population age 80 +_Female": {
+      "type": "number"
+    },
+    "Percentage of population age 80 +_Male": {
+      "type": "number"
+    },
+    "Percentage of population age 80 +_Total": {
+      "type": "number"
+    },
+    "Geography": {
+      "type": "string"
+    }
+  },
+  "target": "Access_to_electricity_binned"
+}

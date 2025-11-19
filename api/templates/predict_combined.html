@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Local Prediction (Combined)</h1>
+<p>Provide household and location details to run a combined local prediction.</p>
+
+<form id="combinedForm" class="filters">
+  <label>Household Water Source</label>
+  <input type="text" name="Household_Water_Source" placeholder="Borehole, River, Tap">
+
+  <label>Latitude</label>
+  <input type="text" id="latInput" name="Location_of_households_Latitude" placeholder="Auto-detected">
+
+  <label>Longitude</label>
+  <input type="text" id="lonInput" name="Location_of_households_Longitude" placeholder="Auto-detected">
+
+  <label>UnsafeWater</label>
+  <select name="UnsafeWater">
+    <option value="0">No</option>
+    <option value="1">Yes</option>
+  </select>
+
+  <button type="submit">Run Prediction</button>
+</form>
+
+<script>
+// Autofill lat/lon
+if (navigator.geolocation) {
+  navigator.geolocation.getCurrentPosition(pos => {
+    document.getElementById("latInput").value = pos.coords.latitude.toFixed(5);
+    document.getElementById("lonInput").value = pos.coords.longitude.toFixed(5);
+  });
+}
+
+document.getElementById("combinedForm").addEventListener("submit", async e => {
+  e.preventDefault();
+  const formData = new FormData(e.target);
+  const res = await fetch("/predict/combined/run", { method: "POST", body: formData });
+  const result = await res.json();
+  showToast(" Combined Prediction complete! Risk Score: " + result.record.risk_score);
+
+  // Update dashboard if table exists
+  const table = document.querySelector(".risk-table tbody");
+  if (table) {
+    const row = document.createElement("tr");
+    row.innerHTML = `
+      <td>${result.record.date}</td>
+      <td>${result.record.lat}</td>
+      <td>${result.record.lon}</td>
+      <td>${result.record.category}</td>
+      <td>${result.record.is_risky ? "Yes" : "No"}</td>
+      <td>${result.record.risk_score}</td>
+      <td>${result.record.source}</td>
+    `;
+    table.prepend(row);
+  }
+});
+</script>
+{% endblock %}

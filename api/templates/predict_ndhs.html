@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block content %}
+<!-- Breadcrumb -->
+<nav class="breadcrumb" aria-label="Breadcrumb">
+  <a href="/">Home</a> › Predictions › NDHS
+</nav>
+
+<h1>National Prediction (NDHS)</h1>
+<p>Select indicators below to run a national‑level prediction.</p>
+
+<!-- Indicator Selection -->
+<form id="ndhsForm">
+  <div class="indicator-select">
+    <label for="indicator">Choose Indicator:</label>
+    <select id="indicator" name="indicator" required>
+      <option value="">-- Select an indicator --</option>
+      <option value="unsafe_water_households">Unsafe water households (%)</option>
+      <option value="child_mortality_rate">Child mortality rate</option>
+      <option value="maternal_mortality_rate">Maternal mortality rate</option>
+      <option value="malnutrition_prevalence">Malnutrition prevalence</option>
+      <option value="immunization_coverage">Immunization coverage</option>
+      <option value="sanitation_access">Access to sanitation (%)</option>
+      <option value="literacy_rate">Literacy rate</option>
+      <option value="poverty_index">Poverty index</option>
+    </select>
+  </div>
+
+  <div class="value-input">
+    <label for="value">Enter Value:</label>
+    <input type="number" id="value" name="value" step="0.01" required />
+  </div>
+
+  <button type="submit" class="btn primary">Run NDHS Prediction</button>
+</form>
+
+<!-- Prediction Result -->
+<div id="predictionResult" style="margin-top:1.5rem;"></div>
+
+<script>
+  document.getElementById("ndhsForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const indicator = document.getElementById("indicator").value;
+    const value = document.getElementById("value").value;
+
+    try {
+      const res = await fetch("/predict/ndhs", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ indicator, value })
+      });
+
+      if (!res.ok) throw new Error("Prediction failed");
+      const result = await res.json();
+      document.getElementById("predictionResult").innerHTML =
+        `<p><strong>Prediction Result:</strong> ${result.prediction}</p>`;
+      showToast(" NDHS prediction completed", "info");
+    } catch (err) {
+      console.error(err);
+      showToast("❌ Failed to run NDHS prediction", "error");
+    }
+  });
+</script>
+{% endblock %}

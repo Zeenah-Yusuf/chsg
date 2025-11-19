@@ -1,0 +1,325 @@
+/* === Global Theme Variables === */
+:root {
+  --deep-blue: #1E3A8A;
+  --accent-blue: #3B82F6;
+  --soft-blue: #EEF2FF;
+  --nature-green: #2F855A;
+  --pale-green: #A7F3D0;
+  --white: #F9FAFB;
+  --dark-gray: #1F2937;
+  --text-gray: #374151;
+  --border-gray: #E5E7EB;
+}
+
+/* === Base Styles === */
+body {
+  font-family: "Inter", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  background-color: var(--white);
+  color: var(--text-gray);
+  margin: 0;
+  padding: 0;
+  line-height: 1.6;
+  font-size: 16px;
+}
+
+h1, h2, h3 {
+  color: var(--deep-blue);
+  margin-bottom: 0.5rem;
+}
+
+p, ul, li {
+  font-size: 1rem;
+}
+
+main {
+  flex-grow: 1;
+  padding: 2rem;
+  max-width: 1100px;
+  margin: 0 auto;
+  background-color: var(--white);
+}
+
+/* === Layout === */
+.layout {
+  display: flex;
+  min-height: 100vh;
+  flex-direction: row;
+}
+
+@media (max-width: 768px) {
+  .layout {
+    flex-direction: column;
+  }
+
+  main {
+    padding: 1rem;
+  }
+}
+
+/* === Sidebar === */
+.sidebar {
+  width: 240px;
+  background-color: var(--nature-green);
+  color: var(--white);
+  padding: 1.5rem 1rem;
+  flex-shrink: 0;
+}
+
+.sidebar-brand h2 {
+  font-size: 1.6rem;
+  margin-bottom: 1.5rem;
+  color: var(--white);
+}
+
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.nav-link,
+.nav-sublink {
+  color: var(--white);
+  text-decoration: none;
+  font-weight: 500;
+  padding: 0.3rem 0;
+  display: block;
+}
+
+.nav-link:hover,
+.nav-sublink:hover {
+  color: var(--pale-green);
+  text-decoration: underline;
+}
+
+.nav-group {
+  margin-top: 1rem;
+}
+
+.nav-label {
+  font-size: 0.9rem;
+  font-weight: bold;
+  margin-bottom: 0.25rem;
+  color: var(--white);
+}
+
+/* === Breadcrumb === */
+.breadcrumb {
+  font-size: 0.95rem;
+  padding: 0.5rem 1rem;
+  background-color: var(--pale-green);
+  color: var(--nature-green);
+  border-radius: 6px;
+  margin-bottom: 1rem;
+}
+
+.breadcrumb a {
+  color: var(--deep-blue);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.breadcrumb a:hover {
+  text-decoration: underline;
+  color: var(--accent-blue);
+}
+
+/* === Hero Section === */
+.hero {
+  background: linear-gradient(rgba(30, 58, 138, 0.85), rgba(47, 133, 90, 0.85)),
+              url('/static/hero-bg.jpg') center/cover no-repeat;
+  color: var(--white);
+  padding: 4rem 2rem;
+  text-align: center;
+  border-radius: 8px;
+  margin-bottom: 2rem;
+}
+
+.hero h1 {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+}
+
+.hero p {
+  font-size: 1.2rem;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+/* === Buttons === */
+.btn {
+  display: inline-block;
+  padding: 0.75rem 1.25rem;
+  border-radius: 6px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background-color 0.3s ease;
+}
+
+.btn.primary {
+  background-color: var(--nature-green);
+  color: var(--white);
+}
+
+.btn.primary:hover {
+  background-color: var(--accent-blue);
+}
+
+.btn.secondary {
+  background-color: transparent;
+  border: 2px solid var(--white);
+  color: var(--white);
+}
+
+.btn.secondary:hover {
+  background-color: var(--white);
+  color: var(--deep-blue);
+}
+
+/* === Dashboard Table === */
+.risk-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+  font-size: 0.95rem;
+  background: #fff;
+  border: 1px solid var(--border-gray);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.risk-table th {
+  background-color: var(--deep-blue);
+  color: var(--white);
+  padding: 0.75rem;
+  text-align: center;
+}
+
+.risk-table td {
+  border-top: 1px solid var(--border-gray);
+  padding: 0.75rem;
+  text-align: center;
+  color: var(--text-gray);
+}
+
+.risk-table tr:nth-child(even) {
+  background-color: var(--soft-blue);
+}
+
+@media (max-width: 768px) {
+  .risk-table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+
+  .risk-table th, .risk-table td {
+    font-size: 0.85rem;
+    padding: 0.5rem;
+  }
+}
+
+/* === Footer === */
+.site-footer {
+  background-color: var(--nature-green);
+  color: var(--white);
+  padding: 1.5rem 1rem;
+  text-align: center;
+}
+
+.site-footer a {
+  color: var(--white);
+  margin: 0 0.5rem;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.site-footer a:hover {
+  color: var(--pale-green);
+  text-decoration: underline;
+}
+/* === Sidebar Toggle Button === */
+.sidebar-toggle {
+  position: fixed;
+  top: 0.5rem;
+  left: 0.2rem;
+  background-color: var(--accent-blue);
+  color: var(--white);
+  border: none;
+  font-size: 1rem;
+  padding: 0.5rem 0.5rem;
+  border-radius: 2px;
+  cursor: pointer;
+  z-index: 1001;
+}
+
+/* === Sidebar Hidden by Default === */
+.sidebar {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 240px;
+  height: 100%;
+  background-color: var(--nature-green);
+  color: var(--white);
+  padding: 1.5rem 1rem;
+  z-index: 1000;
+  overflow-y: auto;
+}
+
+.sidebar.active {
+  display: block;
+}
+
+/* === Next Page Button (Floating Right) === */
+.next-page {
+  position: fixed;
+  bottom: 2rem;       /* floats above footer */
+  right: 2rem;        /* aligned to right side */
+  background: var(--accent-blue);
+  color: var(--white);
+  padding: 0.75rem 1.25rem;
+  border-radius: 6px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  z-index: 999;
+}
+
+.next-page a {
+  color: var(--white);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.next-page a:hover {
+  text-decoration: underline;
+  color: var(--pale-green);
+}
+/* === Popup Notification === */
+.popup {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  background-color: var(--accent-blue);
+  color: var(--white);
+  padding: 1rem 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  display: none;
+  align-items: center;
+  gap: 1rem;
+  z-index: 1000;
+  font-weight: 500;
+}
+
+.popup.active {
+  display: flex;
+}
+
+.popup-close {
+  background: transparent;
+  border: none;
+  color: var(--white);
+  font-size: 1.2rem;
+  cursor: pointer;
+}

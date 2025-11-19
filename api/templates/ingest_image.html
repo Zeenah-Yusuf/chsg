@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Image Reports</h1>
+<p>Upload an image to generate an environment-based prediction.</p>
+
+<form id="imageForm" enctype="multipart/form-data" class="filters">
+  <label>Image file</label>
+  <input type="file" name="file" accept="image/*" required>
+
+  <label>Latitude</label>
+  <input type="text" id="latInput" name="lat" placeholder="Auto-detected">
+
+  <label>Longitude</label>
+  <input type="text" id="lonInput" name="lon" placeholder="Auto-detected">
+
+  <button type="submit">Upload</button>
+</form>
+
+<script>
+// Auto-fill lat/lon using browser geolocation (optional)
+if (navigator.geolocation) {
+  navigator.geolocation.getCurrentPosition(
+    pos => {
+      document.getElementById("latInput").value = pos.coords.latitude.toFixed(5);
+      document.getElementById("lonInput").value = pos.coords.longitude.toFixed(5);
+    },
+    err => {
+      console.warn("Geolocation failed:", err.message);
+    }
+  );
+}
+
+document.getElementById("imageForm").addEventListener("submit", async function(e) {
+  e.preventDefault();
+
+  const form = e.target;
+  const formData = new FormData(form);
+
+  try {
+    const res = await fetch("/ingest/image", {
+      method: "POST",
+      body: formData
+    });
+
+    // Handle non-200 responses gracefully
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      const msg = errData.detail || "Image ingestion failed.";
+      showToast("❌ " + msg);
+      return;
+    }
+
+    const result = await res.json();
+
+    // Toast popup with risk score
+    showToast(" Image ingested! Risk Score: " + result.record.risk_score);
+
+    // Update dashboard table if present on this page
+    const table = document.querySelector(".risk-table tbody");
+    if (table && result.record) {
+      const r = result.record;
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td>${r.date}</td>
+        <td>${r.lat}</td>
+        <td>${r.lon}</td>
+        <td>${r.category}</td>
+        <td>${r.is_risky ? "Yes" : "No"}</td>
+        <td>${r.risk_score}</td>
+        <td>${r.source}</td>
+      `;
+      table.prepend(row);
+    }
+
+    // Optional: reset the form after successful upload
+    form.reset();
+
+  } catch (err) {
+    console.error("Image upload error:", err);
+    showToast(" Network error while uploading image.");
+  }
+});
+</script>
+{% endblock %}

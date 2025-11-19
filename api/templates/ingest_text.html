@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Text Reports</h1>
+<p>Submit a text report to generate a risk prediction.</p>
+
+<form id="textForm" class="filters">
+  <label>Report text</label>
+  <input type="text" name="text" placeholder="Cholera outbreak near river" required>
+
+  <label>Latitude</label>
+  <input type="text" id="latInput" name="lat" placeholder="Auto-detected">
+
+  <label>Longitude</label>
+  <input type="text" id="lonInput" name="lon" placeholder="Auto-detected">
+
+  <button type="submit">Submit</button>
+</form>
+
+<script>
+// Auto-fill lat/lon using browser geolocation
+if (navigator.geolocation) {
+  navigator.geolocation.getCurrentPosition(
+    pos => {
+      document.getElementById("latInput").value = pos.coords.latitude.toFixed(5);
+      document.getElementById("lonInput").value = pos.coords.longitude.toFixed(5);
+    },
+    err => {
+      console.warn("Geolocation failed:", err.message);
+    }
+  );
+}
+
+document.getElementById("textForm").addEventListener("submit", async function(e) {
+  e.preventDefault();
+  const formData = new FormData(e.target);
+
+  // Convert FormData to JSON for backend
+  const payload = Object.fromEntries(formData.entries());
+
+  const response = await fetch("/ingest/text", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload)
+  });
+
+  const result = await response.json();
+
+  // Show toast popup
+  showToast(" Text ingested! Risk Score: " + result.record.risk_score);
+
+  // Update dashboard table if present
+  const table = document.querySelector(".risk-table tbody");
+  if (table) {
+    const row = document.createElement("tr");
+    row.innerHTML = `
+      <td>${result.record.date}</td>
+      <td>${result.record.lat}</td>
+      <td>${result.record.lon}</td>
+      <td>${result.record.category}</td>
+      <td>${result.record.is_risky ? "Yes" : "No"}</td>
+      <td>${result.record.risk_score}</td>
+      <td>${result.record.source}</td>
+    `;
+    table.prepend(row);
+  }
+});
+</script>
+{% endblock %}

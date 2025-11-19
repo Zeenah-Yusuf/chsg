@@ -1,0 +1,242 @@
+{% extends "base.html" %}
+{% block content %}
+<!-- Breadcrumb specific to Dashboard -->
+<nav class="breadcrumb" aria-label="Breadcrumb">
+  <a href="/">Home</a> › Dashboard
+</nav>
+
+<h1>Risk Dashboard</h1>
+<p>Latest predictions, alerts, and geographic distribution of risks.</p>
+
+<!-- Filters -->
+<div class="filters">
+  <label for="categoryFilter">Category:</label>
+  <select id="categoryFilter">
+    <option value="">All</option>
+  </select>
+
+  <label for="dateFilter">Date (after):</label>
+  <input type="date" id="dateFilter"/>
+  <button id="applyBtn">Apply Filters</button>
+  <button id="resetBtn">Reset</button>
+  <button id="exportBtn">Export to Excel</button>
+</div>
+
+<!-- Table -->
+<table class="risk-table" id="riskTable">
+  <thead>
+    <tr>
+      <th>Date</th>
+      <th>Latitude</th>
+      <th>Longitude</th>
+      <th>Category</th>
+      <th>Risky</th>
+      <th>Risk Score</th>
+      <th>Source</th>
+    </tr>
+  </thead>
+  <tbody id="riskTableBody"></tbody>
+</table>
+
+<!-- Charts -->
+<div class="charts">
+  <canvas id="riskTrendChart"></canvas>
+  <canvas id="categoryChart"></canvas>
+</div>
+
+<!-- Map -->
+<div id="riskMap" style="height: 500px; margin-top: 2rem;"></div>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<!-- Leaflet.js -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<!-- SheetJS for Excel export -->
+<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+
+<script>
+  let allRecords = [];
+  let filteredRecords = [];
+  let riskTrendChart, categoryChart, map;
+
+  // === Fetch latest records from backend ===
+  async function fetchRecords() {
+    try {
+      const res = await fetch("/risk/latest");
+      if (!res.ok) throw new Error("Server error");
+      const data = await res.json();
+      allRecords = data;
+      filteredRecords = [...allRecords];
+      renderDashboard(filteredRecords);
+      populateCategoryFilter();
+    } catch (err) {
+      console.error("Failed to fetch records:", err);
+      showPopup("❌ Failed to load dashboard data");
+    }
+  }
+
+  // === Render dashboard ===
+  function renderDashboard(records) {
+    // Table
+    const tbody = document.getElementById("riskTableBody");
+    tbody.innerHTML = "";
+    records.forEach(r => {
+      const row = `<tr>
+        <td>${r.date}</td>
+        <td>${r.lat ?? ""}</td>
+        <td>${r.lon ?? ""}</td>
+        <td>${r.category ?? ""}</td>
+        <td>${r.is_risky ? "Yes" : "No"}</td>
+        <td>${r.risk_score ?? ""}</td>
+        <td>${r.source || "N/A"}</td>
+      </tr>`;
+      tbody.innerHTML += row;
+    });
+
+    // Charts
+    const dates = records.map(r => r.date);
+    const scores = records.map(r => r.risk_score || 0);
+
+    const categories = {};
+    records.forEach(r => {
+      if (r.category) categories[r.category] = (categories[r.category] || 0) + 1;
+    });
+
+    if (riskTrendChart) riskTrendChart.destroy();
+    riskTrendChart = new Chart(document.getElementById('riskTrendChart'), {
+      type: 'line',
+      data: {
+        labels: dates.slice().reverse(),
+        datasets: [{
+          label: 'Risk Score Trend',
+          data: scores.slice().reverse(),
+          borderColor: '#1E3A8A',
+          backgroundColor: '#3B82F6',
+          fill: true
+        }]
+      }
+    });
+
+    if (categoryChart) categoryChart.destroy();
+    categoryChart = new Chart(document.getElementById('categoryChart'), {
+      type: 'bar',
+      data: {
+        labels: Object.keys(categories),
+        datasets: [{
+          label: 'Category Counts',
+          data: Object.values(categories),
+          backgroundColor: ['#1E3A8A', '#2F855A', '#3B82F6', '#A7F3D0']
+        }]
+      },
+      options: { plugins: { legend: { display: false } } }
+    });
+
+    // Map
+    if (!map) {
+      map = L.map('riskMap').setView([9.0820, 8.6753], 6);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors'
+      }).addTo(map);
+    }
+    // Remove old markers
+    map.eachLayer(layer => {
+      if (layer instanceof L.CircleMarker) map.removeLayer(layer);
+    });
+    records.forEach(r => {
+      if (r.lat && r.lon) {
+        const marker = L.circleMarker([r.lat, r.lon], {
+          radius: 6,
+          fillColor: r.is_risky ? '#E11D48' : '#2F855A',
+          color: '#1E3A8A',
+          weight: 1,
+          opacity: 1,
+          fillOpacity: 0.8
+        }).addTo(map);
+        marker.bindPopup(`
+          <strong>${r.category}</strong><br/>
+          Date: ${r.date}<br/>
+          Risk Score: ${r.risk_score}<br/>
+          Source: ${r.source || "N/A"}
+        `);
+      }
+    });
+  }
+
+  // === Populate category filter ===
+  function populateCategoryFilter() {
+    const select = document.getElementById("categoryFilter");
+    select.innerHTML = '<option value="">All</option>';
+    const categories = [...new Set(allRecords.map(r => r.category).filter(Boolean))];
+    categories.forEach(c => {
+      const opt = document.createElement("option");
+      opt.value = c;
+      opt.textContent = c;
+      select.appendChild(opt);
+    });
+  }
+
+  // === Filters ===
+  function applyFilters() {
+    const category = document.getElementById("categoryFilter").value;
+    const dateAfter = document.getElementById("dateFilter").value;
+
+    filteredRecords = allRecords.filter(r => {
+      let ok = true;
+      if (category && r.category !== category) ok = false;
+      if (dateAfter && new Date(r.date) < new Date(dateAfter)) ok = false;
+      return ok;
+    });
+
+    renderDashboard(filteredRecords);
+  }
+
+  function resetFilters() {
+    document.getElementById("categoryFilter").value = "";
+    document.getElementById("dateFilter").value = "";
+    filteredRecords = [...allRecords];
+    renderDashboard(filteredRecords);
+  }
+
+  // === Excel Export ===
+  function exportExcel() {
+    const worksheet = XLSX.utils.json_to_sheet(filteredRecords);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Risk Data");
+    XLSX.writeFile(workbook, "risk_dashboard.xlsx");
+  }
+
+  // === Polling for new records ===
+  async function pollUpdates() {
+    try {
+      const res = await fetch("/risk/latest");
+      const data = await res.json();
+      if (JSON.stringify(data) !== JSON.stringify(allRecords)) {
+        allRecords = data;
+        filteredRecords = [...allRecords];
+        renderDashboard(filteredRecords);
+        showPopup(" New prediction/ingestion record added! Go to Dashboard to view.");
+      }
+    } catch (err) {
+      console.error("Polling failed:", err);
+    }
+  }
+
+  // Bind buttons
+  document.getElementById("applyBtn").addEventListener("click", applyFilters);
+  document.getElementById("resetBtn").addEventListener("click", resetFilters);
+  document.getElementById("exportBtn").addEventListener("click", exportExcel);
+
+  // Initial render
+  fetchRecords();
+
+  // Poll every 10 seconds
+  setInterval(pollUpdates, 10000);
+
+  // === Show popup if redirected with ?msg= ===
+  const params = new URLSearchParams(window.location.search);
+  if (params.has("msg")) {
+    showPopup(params.get("msg"));
+  }
+</script>
+{% endblock %}
