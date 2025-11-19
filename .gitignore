@@ -60,6 +60,11 @@ coverage.xml
 
 # === Deployment / Config ===
 *.sqlite3
+*.csv
+*.mp4
+*.zip
+*.tar
+large_datasets/
 *.db
 *.pid
 *.sock
