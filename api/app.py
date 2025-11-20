@@ -476,27 +476,27 @@ async def run_combined(
 
 
 # ---------- Predictions: NDHS (AJAX FormData) ----------
-@app.post("/predict/ndhs/run")
-async def run_ndhs(
-    state: str = Form(...),
-    indicator: str = Form(...),
-):
+@app.post("/predict/ndhs")
+async def run_ndhs(request: Request):
+    data = await request.json()
+    indicator = data.get("indicator")
+    value = float(data.get("value"))
+
     cat_weight = 0.3 if "unsafe" in indicator.lower() else 0.15
-    # NDHS demo uses state/indicator; no lat/lon provided, treat as 0 with unsafe emphasis
     risk_score = compute_risk_score(lat=0.0, lon=0.0, unsafe_flag=1, category_weight=cat_weight)
     is_risky = risk_score >= 0.5
 
     record = {
         "date": datetime.now(LOCAL_TZ).strftime("%Y-%m-%d %H:%M:%S"),
-        "state": state,
         "indicator": indicator,
+        "value": value,
         "category": "ndhs_prediction",
         "is_risky": is_risky,
         "risk_score": risk_score,
         "source": "ndhs",
     }
     write_latest_risk(record)
-    return JSONResponse({"message": "NDHS Prediction complete", "record": record})
+    return {"prediction": "Risky" if is_risky else "Safe", "record": record}
     return RedirectResponse(url="/dashboard?msg=Prediction complete! Go to Dashboard to view.", status_code=303)
 # ---------- Risk data ----------
 
