@@ -564,7 +564,7 @@ async def run_ndhs(request: Request):
 
         # Simple heuristic for demo
         cat_weight = 0.3 if "unsafe" in indicator.lower() else 0.15
-        risk_score = compute_risk_score(lat=0.0, lon=0.0, unsafeflag=1, categoryweight=catweight)
+        risk_score = compute_risk_score(lat=0.0, lon=0.0, unsafeflag=1, categoryweight=cat_weight)
         isrisky = riskscore >= 0.5
 
         record = {
