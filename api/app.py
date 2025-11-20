@@ -307,7 +307,7 @@ def run_combined(
     else:  # default: HTML with pop‑up
         return templates.TemplateResponse(
             "predict_combined.html",
-            {"request": request, "riskscore": riskscore, "isrisky": isrisky}
+            {"request": request, "risk_score": risk_score, "is_risky": is_risky}
         )
 # --- Ingestion pages (GET) ---
 
@@ -444,7 +444,7 @@ async def ingest_voice(payload: dict = Body(...)):
         if mode == "html":
             return templates.TemplateResponse(
                 "ingest_voice.html",
-                {"request": request, "riskscore": riskscore, "isrisky": isrisky}
+                {"request": request, "riskscore": riskscore, "is_risky": is_risky}
             )
         else:
             return {"prediction": "Risky" if is_risky else "Safe", "record": record}
@@ -457,6 +457,7 @@ async def ingest_image(
     file: UploadFile = File(...),
     lat: float = Form(0.0),
     lon: float = Form(0.0),
+    mode: str = Form("json")
 ):
     tmp_path = os.path.join(DATA_DIR, f"upload_{datetime.now(LOCAL_TZ).timestamp()}_{file.filename}")
     try:
@@ -488,7 +489,7 @@ async def ingest_image(
         if mode == "html":
             return templates.TemplateResponse(
                 "ingest_image.html",
-                {"request": request, "riskscore": riskscore, "isrisky": isrisky}
+                {"request": request, "risk_score": risk_score, "is_risky": is_risky}
             )
         else:
             return {"prediction": "Risky" if is_risky else "Safe", "record": record}
@@ -502,6 +503,7 @@ async def run_combined(
     Location_of_households_Latitude: float = Form(0.0),
     Location_of_households_Longitude: float = Form(0.0),
     UnsafeWater: int = Form(0),
+    mode: str = Form("json")
 ):
     lat = to_float(Location_of_households_Latitude)
     lon = to_float(Location_of_households_Longitude)
@@ -543,7 +545,7 @@ async def run_combined(
     else:  # default: HTML with pop‑up
         return templates.TemplateResponse(
             "predict_combined.html",
-            {"request": request, "riskscore": riskscore, "isrisky": isrisky}
+            {"request": request, "risk_score": risk_score, "is_risky": is_risky}
         )
 # ---------- Predictions: NDHS (AJAX FormData) ----------
 @app.post("/predict/ndhs")
@@ -559,7 +561,7 @@ async def run_ndhs(request: Request):
 
         # Simple heuristic for demo
         cat_weight = 0.3 if "unsafe" in indicator.lower() else 0.15
-        riskscore = computeriskscore(lat=0.0, lon=0.0, unsafeflag=1, categoryweight=catweight)
+        risk_score = compute_risk_score(lat=0.0, lon=0.0, unsafeflag=1, categoryweight=catweight)
         isrisky = riskscore >= 0.5
 
         record = {
@@ -568,8 +570,8 @@ async def run_ndhs(request: Request):
             "indicator": indicator,
             "value": value,
             "category": "ndhs_prediction",
-            "isrisky": isrisky,
-            "riskscore": riskscore,
+            "is_risky": is_risky,
+            "risk_score": risk_score,
             "source": "ndhs",
         }
 
@@ -577,7 +579,7 @@ async def run_ndhs(request: Request):
         if mode == "html":
             return templates.TemplateResponse(
                 "predict_ndhs.html",
-                {"request": request, "riskscore": riskscore, "isrisky": isrisky}
+                {"request": request, "risk_score": risk_score, "is_risky": is_risky}
             )
         else:  # default JSON for AJAX
             return {"prediction": "Risky" if is_risky else "Safe", "record": record}
