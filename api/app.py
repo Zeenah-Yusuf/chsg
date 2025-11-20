@@ -393,7 +393,7 @@ def ingest_text(request: Request, payload: TextIngest, mode: str = "json"):
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Text prediction error: {e}")
-# ---------- Ingestion: Voice (AJAX FormData) ----------
+
 # ---------- Ingestion: Voice (Transcript JSON) ----------
 from fastapi import Body
 @app.post("/ingest/voice")
@@ -444,17 +444,18 @@ async def ingest_voice(payload: dict = Body(...)):
         if mode == "html":
             return templates.TemplateResponse(
                 "ingest_voice.html",
-                {"request": request, "riskscore": riskscore, "is_risky": is_risky}
+                {"request": request, "risk_score": risk_score, "is_risky": is_risky}
             )
         else:
             return {"prediction": "Risky" if is_risky else "Safe", "record": record}
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Voice prediction error: {e}")
+
 # ---------- Ingestion: Image (AJAX FormData
 @app.post("/ingest/image")
 async def ingest_image(
-    request: Request,   # ✅ include request
+    request: Request,  
     file: UploadFile = File(...),
     lat: float = Form(0.0),
     lon: float = Form(0.0),
@@ -472,8 +473,8 @@ async def ingest_image(
 
         category = "image_environment"
         cat_weight = 0.25 if brightness > 0.5 else 0.15
-        lat_f, lon_f = to_float(lat), to_float(lon)   # ✅ consistent naming
-        risk_score = compute_risk_score(lat_f, lon_f, unsafe_flag=0, category_weight=cat_weight)  # ✅ correct function name
+        lat_f, lon_f = to_float(lat), to_float(lon)   
+        risk_score = compute_risk_score(lat_f, lon_f, unsafe_flag=0, category_weight=cat_weight) 
         is_risky = risk_score >= 0.5
 
         record = {
@@ -498,7 +499,9 @@ async def ingest_image(
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Image prediction error: {e}")
+
 # ---------- Predictions: Combined (AJAX FormData) ----------
+
 @app.post("/predict/combined/run")
 async def run_combined(
     Household_Water_Source: str = Form(...),
@@ -540,7 +543,7 @@ async def run_combined(
         "rf_prediction": 1 if is_risky else 0,
         "xgb_prediction": 1 if (risk_score > 0.65) else 0,
     }
-    # ✅ Decide response mode
+    # Decide response mode
     if mode == "json":
         return JSONResponse({"message": "Prediction complete", "record": record, "predictions": predictions})
     elif mode == "redirect":
@@ -564,8 +567,8 @@ async def run_ndhs(request: Request):
 
         # Simple heuristic for demo
         cat_weight = 0.3 if "unsafe" in indicator.lower() else 0.15
-        risk_score = compute_risk_score(lat=0.0, lon=0.0, unsafeflag=1, categoryweight=cat_weight)
-        isrisky = riskscore >= 0.5
+        risk_score = compute_risk_score(lat=0.0, lon=0.0, unsafe_flag=1, categoryweight=cat_weight)
+        is_risky = risks_core >= 0.5
 
         record = {
             "date": datetime.now(LOCAL_TZ).strftime("%Y-%m-%d %H:%M:%S"),
