@@ -300,48 +300,6 @@ def predict_ndhs_page(request: Request):
         "breadcrumb": "National Prediction (NDHS)",
         "next_page": {"url": "/dashboard", "label": "View Dashboard"}
     })
-# --- Prediction pages (POST) ---
-
-@app.post("/predict/combined/run")
-def run_combined(
-    Household_Water_Source: str = Form(...),
-    Location_of_households_Latitude: float = Form(0.0),
-    Location_of_households_Longitude: float = Form(0.0),
-    UnsafeWater: int = Form(0),
-):
-    lat = to_float(Location_of_households_Latitude)
-    lon = to_float(Location_of_households_Longitude)
-    unsafe = to_int(UnsafeWater)
-
-    risk_score = compute_risk_score(lat, lon, unsafe_flag=unsafe, category_weight=0.25)
-    record = {
-        "date": datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"),
-        "lat": lat,
-        "lon": lon,
-        "category": "combined_local",
-        "is_risky": risk_score >= 0.5,
-        "risk_score": risk_score,
-        "source": "combined",
-        "features": {
-            "Household Water Source": Household_Water_Source,
-            "UnsafeWater": unsafe
-        }
-    }
-    write_latest_risk(record)
-    predictions = {
-        "rf_prediction": 1 if is_risky else 0,
-        "xgb_prediction": 1 if (risk_score > 0.65) else 0,
-    }
-    # ✅ Decide response mode
-    if mode == "json":
-        return JSONResponse({"message": "Prediction complete", "record": record, "predictions": predictions})
-    elif mode == "redirect":
-        return RedirectResponse(url="/dashboard?msg=Prediction complete! Go to Dashboard to view.", status_code=303)
-    else:  # default: HTML with pop‑up
-        return templates.TemplateResponse(
-            "predict_combined.html",
-            {"request": request, "risk_score": risk_score, "is_risky": is_risky}
-        )
 # --- Ingestion pages (GET) ---
 
 @app.get("/ingest/text", response_class=HTMLResponse)
