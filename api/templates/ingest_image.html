@@ -54,11 +54,11 @@ document.getElementById("imageForm").addEventListener("submit", async function(e
 
     const result = await res.json();
 
-    // ✅ Pop-up alert with risk score
+    //  Pop-up alert with risk score
     alert("Prediction complete! Risk Score: " + result.record.risk_score +
           " | Risky: " + (result.record.is_risky ? "Yes" : "No"));
 
-    // ✅ Update dashboard table if present
+    //  Update dashboard table if present
     const table = document.querySelector(".risk-table tbody");
     if (table && result.record) {
       const r = result.record;
@@ -75,12 +75,12 @@ document.getElementById("imageForm").addEventListener("submit", async function(e
       table.prepend(row);
     }
 
-    // ✅ Reset form after successful upload
+    //  Reset form after successful upload
     form.reset();
 
   } catch (err) {
     console.error("Image upload error:", err);
-    alert("⚠️ Network error while uploading image.");
+    alert(" Network error while uploading image.");
   }
 });
 </script>
