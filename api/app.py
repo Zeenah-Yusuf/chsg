@@ -377,7 +377,7 @@ def ingest_text(payload: TextIngest):
         "text": text,
     }
     write_latest_risk(record)
-    if mode == "html":
+        if mode == "html":
             return templates.TemplateResponse(
                 "ingest_text.html",
                 {"request": request, "riskscore": riskscore, "isrisky": isrisky}
