@@ -23,11 +23,33 @@
   <textarea id="transcript" rows="5" cols="60" readonly></textarea>
 </div>
 
+<!-- Optional lat/lon inputs for geotagging -->
+<div class="geo-inputs">
+  <label>Latitude</label>
+  <input type="text" id="latInput" name="lat" placeholder="Auto-detected">
+
+  <label>Longitude</label>
+  <input type="text" id="lonInput" name="lon" placeholder="Auto-detected">
+</div>
+
 <button id="submitBtn" disabled>Submit Report</button>
 
 <script>
 let recognition;
 let transcriptText = "";
+
+//  Auto-fill lat/lon using browser geolocation
+if (navigator.geolocation) {
+  navigator.geolocation.getCurrentPosition(
+    pos => {
+      document.getElementById("latInput").value = pos.coords.latitude.toFixed(5);
+      document.getElementById("lonInput").value = pos.coords.longitude.toFixed(5);
+    },
+    err => {
+      console.warn("Geolocation failed:", err.message);
+    }
+  );
+}
 
 // Initialize recognition
 function initRecognition(lang) {
@@ -48,7 +70,7 @@ function initRecognition(lang) {
 
   recognition.onerror = (event) => {
     console.error("Speech recognition error:", event.error);
-    showToast("❌ Voice recognition error: " + event.error, "error");
+    alert("❌ Voice recognition error: " + event.error);
   };
 }
 
@@ -57,7 +79,7 @@ document.getElementById("startBtn").addEventListener("click", () => {
   const lang = document.getElementById("langSelect").value;
   initRecognition(lang);
   recognition.start();
-  showToast(" Recording started (" + lang + "). Speak now...", "info");
+  alert("🎤 Recording started (" + lang + "). Speak now...");
   document.getElementById("startBtn").disabled = true;
   document.getElementById("stopBtn").disabled = false;
 });
@@ -66,7 +88,7 @@ document.getElementById("startBtn").addEventListener("click", () => {
 document.getElementById("stopBtn").addEventListener("click", () => {
   if (recognition) {
     recognition.stop();
-    showToast("⏹ Recording stopped.", "info");
+    alert("⏹ Recording stopped.");
     document.getElementById("startBtn").disabled = false;
     document.getElementById("stopBtn").disabled = true;
   }
@@ -88,12 +110,22 @@ document.getElementById("submitBtn").addEventListener("click", async () => {
       body: JSON.stringify(payload)
     });
 
-    if (!res.ok) throw new Error("Failed to submit voice report");
-    const result = await res.json();
-    showToast(" Voice ingested! Risk Score: " + result.record.risk_score);
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      const msg = errData.detail || "Voice ingestion failed.";
+      alert("❌ " + msg);
+      return;
+    }
 
+    const result = await res.json();
+
+    //  Pop-up alert with risk score
+    alert("Prediction complete! Risk Score: " + result.record.risk_score +
+          " | Risky: " + (result.record.is_risky ? "Yes" : "No"));
+
+    //  Update dashboard table if present
     const table = document.querySelector(".risk-table tbody");
-    if (table) {
+    if (table && result.record) {
       const r = result.record;
       const row = document.createElement("tr");
       row.innerHTML = `
@@ -107,9 +139,15 @@ document.getElementById("submitBtn").addEventListener("click", async () => {
       `;
       table.prepend(row);
     }
+
+    //  Reset transcript after successful submission
+    document.getElementById("transcript").value = "";
+    transcriptText = "";
+    document.getElementById("submitBtn").disabled = true;
+
   } catch (err) {
-    console.error(err);
-    showToast("❌ Failed to submit voice report", "error");
+    console.error("Voice upload error:", err);
+    alert("⚠️ Network error while submitting voice report.");
   }
 });
 </script>
