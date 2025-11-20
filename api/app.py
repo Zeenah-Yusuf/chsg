@@ -348,39 +348,45 @@ from fastapi.responses import JSONResponse
 
 # ---------- Ingestion: Text (AJAX JSON) ----------
 @app.post("/ingest/text")
-def ingest_text(payload: TextIngest):
-    text = safe_str(payload.text)
-    lat = to_float(payload.lat)
-    lon = to_float(payload.lon)
+def ingest_text(request: Request, payload: TextIngest, mode: str = "json"):
+    try:
+        text = safe_str(payload.text)
+        lat = to_float(payload.lat)
+        lon = to_float(payload.lon)
 
-    lower = text.lower()
-    if any(k in lower for k in ["cholera", "diarrhea", "diarrhoea"]):
-        category, cat_weight = "waterborne_cholera", 0.4
-    elif "typhoid" in lower:
-        category, cat_weight = "waterborne_typhoid", 0.35
-    elif any(k in lower for k in ["flood", "river overflow", "contamination"]):
-        category, cat_weight = "environmental_risk", 0.25
-    else:
-        category, cat_weight = "general_report", 0.1
+        lower = text.lower()
+        if any(k in lower for k in ["cholera", "diarrhea", "diarrhoea"]):
+            category, cat_weight = "waterborne_cholera", 0.4
+        elif "typhoid" in lower:
+            category, cat_weight = "waterborne_typhoid", 0.35
+        elif any(k in lower for k in ["flood", "river overflow", "contamination"]):
+            category, cat_weight = "environmental_risk", 0.25
+        else:
+            category, cat_weight = "general_report", 0.1
 
-    risk_score = compute_risk_score(lat, lon, unsafe_flag=1 if "unsafe" in lower else 0, category_weight=cat_weight)
-    is_risky = risk_score >= 0.5
+        risk_score = compute_risk_score(
+            lat, lon,
+            unsafe_flag=1 if "unsafe" in lower else 0,
+            category_weight=cat_weight
+        )
+        is_risky = risk_score >= 0.5
 
-    record = {
-        "date": datetime.now(LOCAL_TZ).strftime("%Y-%m-%d %H:%M:%S"),
-        "lat": lat,
-        "lon": lon,
-        "category": category,
-        "is_risky": is_risky,
-        "risk_score": risk_score,
-        "source": "text",
-        "text": text,
-    }
-    write_latest_risk(record)
+        record = {
+            "date": datetime.now(LOCAL_TZ).strftime("%Y-%m-%d %H:%M:%S"),
+            "lat": lat,
+            "lon": lon,
+            "category": category,
+            "is_risky": is_risky,
+            "risk_score": risk_score,
+            "source": "text",
+            "text": text,
+        }
+        write_latest_risk(record)
+
         if mode == "html":
             return templates.TemplateResponse(
                 "ingest_text.html",
-                {"request": request, "riskscore": riskscore, "isrisky": isrisky}
+                {"request": request, "risk_score": risk_score, "is_risky": is_risky}
             )
         else:
             return {"prediction": "Risky" if is_risky else "Safe", "record": record}
