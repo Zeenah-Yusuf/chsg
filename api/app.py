@@ -306,7 +306,7 @@ def run_combined(
         return RedirectResponse(url="/dashboard?msg=Prediction complete! Go to Dashboard to view.", status_code=303)
     else:  # default: HTML with pop‑up
         return templates.TemplateResponse(
-            "text_ingest.html",
+            "predict_combined.html",
             {"request": request, "riskscore": riskscore, "isrisky": isrisky}
         )
 # --- Ingestion pages (GET) ---
@@ -379,7 +379,7 @@ def ingest_text(payload: TextIngest):
     write_latest_risk(record)
     if mode == "html":
             return templates.TemplateResponse(
-                "text_ingest.html",
+                "ingest_text.html",
                 {"request": request, "riskscore": riskscore, "isrisky": isrisky}
             )
         else:
@@ -437,7 +437,7 @@ async def ingest_voice(payload: dict = Body(...)):
         write_latest_risk(record)
         if mode == "html":
             return templates.TemplateResponse(
-                "voice_ingest.html",
+                "ingest_voice.html",
                 {"request": request, "riskscore": riskscore, "isrisky": isrisky}
             )
         else:
@@ -481,7 +481,7 @@ async def ingest_image(
         write_latest_risk(record)
         if mode == "html":
             return templates.TemplateResponse(
-                "image_ingest.html",
+                "ingest_image.html",
                 {"request": request, "riskscore": riskscore, "isrisky": isrisky}
             )
         else:
@@ -536,7 +536,7 @@ async def run_combined(
         return RedirectResponse(url="/dashboard?msg=Prediction complete! Go to Dashboard to view.", status_code=303)
     else:  # default: HTML with pop‑up
         return templates.TemplateResponse(
-            "text_ingest.html",
+            "predict_combined.html",
             {"request": request, "riskscore": riskscore, "isrisky": isrisky}
         )
 # ---------- Predictions: NDHS (AJAX FormData) ----------
@@ -570,7 +570,7 @@ async def run_ndhs(request: Request):
         writelatestrisk(record)
         if mode == "html":
             return templates.TemplateResponse(
-                "text_ingest.html",
+                "predict_ndhs.html",
                 {"request": request, "riskscore": riskscore, "isrisky": isrisky}
             )
         else:  # default JSON for AJAX
