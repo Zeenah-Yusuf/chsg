@@ -462,28 +462,32 @@ async def ingest_voice(payload: dict = Body(...)):
 # ---------- Ingestion: Image (AJAX FormData
 @app.post("/ingest/image")
 async def ingest_image(
-    request: Request,  
+    request: Request,
     file: UploadFile = File(...),
     lat: float = Form(0.0),
     lon: float = Form(0.0),
     mode: str = Form("json")
 ):
-    tmp_path = os.path.join(DATADIR, f"upload{datetime.now(LOCAL_TZ).timestamp()}_{file.filename}")
     try:
+        # Save uploaded file temporarily
+        tmp_path = os.path.join(DATA_DIR, f"upload_{datetime.now(LOCAL_TZ).timestamp()}_{file.filename}")
         content = await file.read()
         with open(tmp_path, "wb") as f:
             f.write(content)
 
+        # Process image
         img = Image.open(tmp_path).convert("RGB")
         arr = np.array(img, dtype=np.uint8)
         brightness = float(arr.mean()) / 255.0
 
+        # Risk scoring
         category = "image_environment"
         cat_weight = 0.25 if brightness > 0.5 else 0.15
-        lat_f, lon_f = to_float(lat), to_float(lon)   
-        risk_score = compute_risk_score(lat_f, lon_f, unsafe_flag=0, category_weight=cat_weight) 
+        lat_f, lon_f = to_float(lat), to_float(lon)
+        risk_score = compute_risk_score(lat_f, lon_f, unsafe_flag=0, category_weight=cat_weight)
         is_risky = risk_score >= 0.5
 
+        # Build record
         record = {
             "date": datetime.now(LOCAL_TZ).strftime("%Y-%m-%d %H:%M:%S"),
             "lat": lat_f,
@@ -496,12 +500,13 @@ async def ingest_image(
         }
         write_latest_risk(record)
 
+        # Response modes
         if mode == "html":
             return templates.TemplateResponse(
                 "ingest_image.html",
                 {"request": request, "risk_score": risk_score, "is_risky": is_risky}
             )
-        else:
+        else:  # default JSON for AJAX
             return {"prediction": "Risky" if is_risky else "Safe", "record": record}
 
     except Exception as e:
