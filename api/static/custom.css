@@ -60,7 +60,6 @@ main {
   background-color: var(--nature-green);
   color: var(--white);
   padding: 1.5rem 1rem;
-  flex-shrink: 0;
   position: fixed;
   top: 0;
   left: -240px; /* hidden by default */
@@ -73,12 +72,20 @@ main {
   left: 0; /* slides in */
 }
 
+/* Optional: shift main content when sidebar is active */
+body.sidebar-open .main-content {
+  margin-left: 240px;
+  transition: margin-left 0.3s ease;
+}
+
+/* === Sidebar Branding === */
 .sidebar-brand h2 {
   font-size: 1.6rem;
   margin-bottom: 1.5rem;
   color: var(--white);
 }
 
+/* === Sidebar Navigation === */
 .sidebar-nav {
   display: flex;
   flex-direction: column;
@@ -112,6 +119,8 @@ main {
   z-index: 1101; /* above sidebar */
   box-shadow: 0 2px 6px rgba(0,0,0,0.2);
 }
+
+
 /* === Breadcrumb === */
 .breadcrumb {
   font-size: 0.95rem;
