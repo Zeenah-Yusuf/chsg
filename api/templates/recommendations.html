@@ -2,7 +2,7 @@
 {% block content %}
 <div class="page-header">
   <h1>National Recommendations</h1>
-  <p class="subtitle">Aggregated insights from recent reports and indicators</p>
+  <p class="subtitle">Aggregated insights from recent reports and NDHS indicators</p>
 </div>
 
 <!-- Heatmap -->
@@ -22,6 +22,18 @@
     <h2>State-Level Recommendations</h2>
     <button id="exportBtn" class="btn primary">⬇ Export to CSV</button>
   </div>
+
+  <!-- Legend Bar -->
+  <div class="legend-bar">
+    <span class="tag water">Water</span>
+    <span class="tag health">Health</span>
+    <span class="tag infrastructure">Infrastructure</span>
+    <span class="tag education">Education</span>
+    <span class="tag poverty">Poverty</span>
+    <span class="tag community">Community</span>
+    <span class="tag general">General</span>
+  </div>
+
   <table id="recommendationsTable" class="styled-table">
     <thead>
       <tr>
@@ -43,7 +55,7 @@
         <td>{{ row.reports }}</td>
         <td>
           {% for rec in row.recommendations %}
-          <span class="tag">{{ rec }}</span>
+          <span class="tag {{ rec.category|lower }}">{{ rec.text }}</span>
           {% endfor %}
         </td>
       </tr>
@@ -66,16 +78,18 @@
 
   const stateData = [
     {% for row in state_summary %}
-    { "state": "{{ row.state }}", "lat": 9.0, "lon": 8.0, "risk": {{ row.avg_risk }} },
+    { "state": "{{ row.state }}", "lat": 9.0, "lon": 8.0, "risk": {{ row.avg_risk }},
+      "recommendations": {{ row.recommendations|tojson }} },
     {% endfor %}
   ];
 
   stateData.forEach(s => {
+    const topRecs = s.recommendations.slice(0,2).map(r => r.text).join(", ");
     L.circle([s.lat, s.lon], {
       radius: s.risk * 50000,
       color: s.risk > 0.7 ? "red" : s.risk > 0.5 ? "orange" : "green",
       fillOpacity: 0.5
-    }).bindPopup(`${s.state}: Risk ${s.risk}`).addTo(map);
+    }).bindPopup(`${s.state}: Risk ${s.risk}<br/>Recommendations: ${topRecs}`).addTo(map);
   });
 
   // Export table to CSV
@@ -92,12 +106,9 @@
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-
-    // Show toast
-    showToast(" Recommendations exported successfully", "success");
+    showToast("Recommendations exported successfully", "success");
   });
 
-  // Toast function
   function showToast(message, type) {
     const toast = document.getElementById("toast");
     toast.className = "toast " + type;
@@ -106,22 +117,4 @@
     setTimeout(() => { toast.style.display = "none"; }, 3000);
   }
 </script>
-
-<style>
-.toast {
-  display:none;
-  position:fixed;
-  bottom:20px;
-  right:20px;
-  background:#333;
-  color:#fff;
-  padding:12px 20px;
-  border-radius:6px;
-  font-size:0.9rem;
-  box-shadow:0 2px 6px rgba(0,0,0,0.2);
-  z-index:1000;
-}
-.toast.success { background:#4CAF50; }
-.toast.error { background:#F44336; }
-</style>
 {% endblock %}
