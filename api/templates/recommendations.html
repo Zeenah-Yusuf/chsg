@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="page-header">
+  <h1>National Recommendations</h1>
+  <p class="subtitle">Aggregated insights from recent reports and indicators</p>
+</div>
+
+<!-- Heatmap -->
+<div class="card">
+  <h2>Risk Heatmap</h2>
+  <div id="heatmap" style="height:500px; border-radius:8px;"></div>
+  <div class="legend">
+    <span class="legend-item low">Low Risk</span>
+    <span class="legend-item medium">Medium Risk</span>
+    <span class="legend-item high">High Risk</span>
+  </div>
+</div>
+
+<!-- Recommendations Table -->
+<div class="card" style="margin-top:2rem;">
+  <div class="table-header">
+    <h2>State-Level Recommendations</h2>
+    <button id="exportBtn" class="btn primary">⬇ Export to CSV</button>
+  </div>
+  <table id="recommendationsTable" class="styled-table">
+    <thead>
+      <tr>
+        <th>State</th>
+        <th>Avg Risk Score</th>
+        <th>Reports</th>
+        <th>Recommendations</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in state_summary %}
+      <tr>
+        <td>{{ row.state }}</td>
+        <td>
+          <span class="badge {% if row.avg_risk > 0.7 %}high{% elif row.avg_risk > 0.5 %}medium{% else %}low{% endif %}">
+            {{ row.avg_risk }}
+          </span>
+        </td>
+        <td>{{ row.reports }}</td>
+        <td>
+          {% for rec in row.recommendations %}
+          <span class="tag">{{ rec }}</span>
+          {% endfor %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<!-- Toast Notification -->
+<div id="toast" class="toast"></div>
+
+<!-- Leaflet Map -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script>
+  const map = L.map('heatmap').setView([9.0820, 8.6753], 6);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap contributors'
+  }).addTo(map);
+
+  const stateData = [
+    {% for row in state_summary %}
+    { "state": "{{ row.state }}", "lat": 9.0, "lon": 8.0, "risk": {{ row.avg_risk }} },
+    {% endfor %}
+  ];
+
+  stateData.forEach(s => {
+    L.circle([s.lat, s.lon], {
+      radius: s.risk * 50000,
+      color: s.risk > 0.7 ? "red" : s.risk > 0.5 ? "orange" : "green",
+      fillOpacity: 0.5
+    }).bindPopup(`${s.state}: Risk ${s.risk}`).addTo(map);
+  });
+
+  // Export table to CSV
+  document.getElementById("exportBtn").addEventListener("click", () => {
+    const rows = [];
+    document.querySelectorAll("#recommendationsTable tr").forEach(tr => {
+      const cells = Array.from(tr.querySelectorAll("td, th")).map(td => td.innerText.trim());
+      rows.push(cells.join(","));
+    });
+    const csvContent = "data:text/csv;charset=utf-8," + rows.join("\n");
+    const link = document.createElement("a");
+    link.setAttribute("href", encodeURI(csvContent));
+    link.setAttribute("download", "recommendations.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    // Show toast
+    showToast(" Recommendations exported successfully", "success");
+  });
+
+  // Toast function
+  function showToast(message, type) {
+    const toast = document.getElementById("toast");
+    toast.className = "toast " + type;
+    toast.innerText = message;
+    toast.style.display = "block";
+    setTimeout(() => { toast.style.display = "none"; }, 3000);
+  }
+</script>
+
+<style>
+.toast {
+  display:none;
+  position:fixed;
+  bottom:20px;
+  right:20px;
+  background:#333;
+  color:#fff;
+  padding:12px 20px;
+  border-radius:6px;
+  font-size:0.9rem;
+  box-shadow:0 2px 6px rgba(0,0,0,0.2);
+  z-index:1000;
+}
+.toast.success { background:#4CAF50; }
+.toast.error { background:#F44336; }
+</style>
+{% endblock %}
