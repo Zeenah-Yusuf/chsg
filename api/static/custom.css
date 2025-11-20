@@ -127,7 +127,7 @@ main {
 /* === Hero Section === */
 .hero {
   background: linear-gradient(rgba(30, 58, 138, 0.85), rgba(47, 133, 90, 0.85)),
-              url('/static/hero-bg.jpg') center/cover no-repeat;
+              url('/static/hero-bg.jpeg') center/cover no-repeat;
   color: var(--white);
   padding: 4rem 2rem;
   text-align: center;
