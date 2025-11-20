@@ -184,6 +184,38 @@ def contact(request: Request):
         "next_page": {"url": "/", "label": "Back to Home"}
     })
 
+@app.get("/recommendations", response_class=HTMLResponse)
+def recommendations(request: Request):
+    records = read_latest_risk(limit=1000)
+    df = pd.DataFrame(records)
+
+    state_summary = []
+    if not df.empty and "state" in df.columns:
+        grouped = df.groupby("state").agg(
+            avg_risk=("risk_score", "mean"),
+            reports=("state", "count")
+        ).reset_index()
+
+        for _, row in grouped.iterrows():
+            recs = []
+            if row["avg_risk"] > 0.7:
+                recs.append("Deploy rapid response teams")
+            if row["avg_risk"] > 0.5:
+                recs.append("Increase chlorine supply")
+            if row["reports"] > 10:
+                recs.append("Conduct community awareness campaigns")
+
+            state_summary.append({
+                "state": row["state"],
+                "avg_risk": round(row["avg_risk"], 2),
+                "reports": row["reports"],
+                "recommendations": recs or ["Monitor closely"]
+            })
+
+    return templates.TemplateResponse(
+        "recommendations.html",
+        {"request": request, "state_summary": state_summary}
+    )
 @app.get("/dashboard", response_class=HTMLResponse)
 def dashboard(request: Request):
     records = read_latest_risk(limit=500)
