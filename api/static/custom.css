@@ -9,6 +9,8 @@
   --dark-gray: #1F2937;
   --text-gray: #374151;
   --border-gray: #E5E7EB;
+  --danger-red: #F44336;
+  --warning-amber: #FFC107;
 }
 
 /* === Base Styles === */
@@ -36,7 +38,6 @@ main {
   padding: 2rem;
   max-width: 1100px;
   margin: 0 auto;
-  background-color: var(--white);
 }
 
 /* === Layout === */
@@ -50,10 +51,7 @@ main {
   .layout {
     flex-direction: column;
   }
-
-  main {
-    padding: 1rem;
-  }
+  main { padding: 1rem; }
 }
 
 /* === Sidebar === */
@@ -64,44 +62,16 @@ main {
   padding: 1.5rem 1rem;
   flex-shrink: 0;
 }
-
-.sidebar-brand h2 {
-  font-size: 1.6rem;
-  margin-bottom: 1.5rem;
-  color: var(--white);
-}
-
-.sidebar-nav {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-
-.nav-link,
-.nav-sublink {
+.sidebar.active { display: block; }
+.sidebar-brand h2 { font-size: 1.6rem; margin-bottom: 1.5rem; }
+.sidebar-nav { display: flex; flex-direction: column; gap: 0.75rem; }
+.nav-link, .nav-sublink {
   color: var(--white);
   text-decoration: none;
   font-weight: 500;
   padding: 0.3rem 0;
-  display: block;
 }
-
-.nav-link:hover,
-.nav-sublink:hover {
-  color: var(--pale-green);
-  text-decoration: underline;
-}
-
-.nav-group {
-  margin-top: 1rem;
-}
-
-.nav-label {
-  font-size: 0.9rem;
-  font-weight: bold;
-  margin-bottom: 0.25rem;
-  color: var(--white);
-}
+.nav-link:hover, .nav-sublink:hover { color: var(--pale-green); text-decoration: underline; }
 
 /* === Breadcrumb === */
 .breadcrumb {
@@ -112,17 +82,8 @@ main {
   border-radius: 6px;
   margin-bottom: 1rem;
 }
-
-.breadcrumb a {
-  color: var(--deep-blue);
-  text-decoration: none;
-  font-weight: 500;
-}
-
-.breadcrumb a:hover {
-  text-decoration: underline;
-  color: var(--accent-blue);
-}
+.breadcrumb a { color: var(--deep-blue); text-decoration: none; }
+.breadcrumb a:hover { text-decoration: underline; color: var(--accent-blue); }
 
 /* === Hero Section === */
 .hero {
@@ -134,212 +95,63 @@ main {
   border-radius: 8px;
   margin-bottom: 2rem;
 }
-
-.hero h1 {
-  font-size: 2.5rem;
-  margin-bottom: 1rem;
-}
-
-.hero p {
-  font-size: 1.2rem;
-  max-width: 800px;
-  margin: 0 auto;
-}
+.hero h1 { font-size: 2.5rem; margin-bottom: 1rem; }
+.hero p { font-size: 1.2rem; max-width: 800px; margin: 0 auto; }
 
 /* === Buttons === */
 .btn {
   display: inline-block;
-  padding: 0.75rem 1.25rem;
+  padding: 0.6rem 1rem;
   border-radius: 6px;
   font-weight: 600;
   text-decoration: none;
+  cursor: pointer;
   transition: background-color 0.3s ease;
 }
+.btn.primary { background-color: var(--accent-blue); color: var(--white); }
+.btn.primary:hover { background-color: var(--deep-blue); }
+.btn.secondary { background-color: transparent; border: 2px solid var(--accent-blue); color: var(--accent-blue); }
+.btn.secondary:hover { background-color: var(--accent-blue); color: var(--white); }
+.btn.success { background-color: var(--nature-green); color: var(--white); }
+.btn.success:hover { background-color: #276749; }
+.btn.danger { background-color: var(--danger-red); color: var(--white); }
+.btn.danger:hover { background-color: #c62828; }
 
-.btn.primary {
-  background-color: var(--nature-green);
-  color: var(--white);
-}
-
-.btn.primary:hover {
-  background-color: var(--accent-blue);
-}
-
-.btn.secondary {
-  background-color: transparent;
-  border: 2px solid var(--white);
-  color: var(--white);
-}
-
-.btn.secondary:hover {
-  background-color: var(--white);
-  color: var(--deep-blue);
-}
-
-/* === Dashboard Table === */
-.risk-table {
+/* === Tables (Dashboard, Recommendations, etc.) === */
+.table, .risk-table, .styled-table {
   width: 100%;
   border-collapse: collapse;
   margin-top: 1rem;
   font-size: 0.95rem;
-  background: #fff;
+  background: var(--white);
   border: 1px solid var(--border-gray);
   border-radius: 8px;
   overflow: hidden;
 }
-
-.risk-table th {
+.table th, .risk-table th, .styled-table th {
   background-color: var(--deep-blue);
   color: var(--white);
   padding: 0.75rem;
   text-align: center;
 }
-
-.risk-table td {
+.table td, .risk-table td, .styled-table td {
   border-top: 1px solid var(--border-gray);
   padding: 0.75rem;
   text-align: center;
   color: var(--text-gray);
 }
-
-.risk-table tr:nth-child(even) {
+.table tr:nth-child(even), .risk-table tr:nth-child(even), .styled-table tr:nth-child(even) {
   background-color: var(--soft-blue);
 }
-
 @media (max-width: 768px) {
-  .risk-table {
+  .table, .risk-table, .styled-table {
     display: block;
     overflow-x: auto;
     white-space: nowrap;
   }
-
-  .risk-table th, .risk-table td {
-    font-size: 0.85rem;
-    padding: 0.5rem;
-  }
 }
 
-/* === Footer === */
-.site-footer {
-  background-color: var(--nature-green);
-  color: var(--white);
-  padding: 1.5rem 1rem;
-  text-align: center;
-}
-
-.site-footer a {
-  color: var(--white);
-  margin: 0 0.5rem;
-  text-decoration: none;
-  font-weight: 500;
-}
-
-.site-footer a:hover {
-  color: var(--pale-green);
-  text-decoration: underline;
-}
-/* === Sidebar Toggle Button === */
-.sidebar-toggle {
-  position: fixed;
-  top: 0.5rem;
-  left: 0.2rem;
-  background-color: var(--accent-blue);
-  color: var(--white);
-  border: none;
-  font-size: 1rem;
-  padding: 0.5rem 0.5rem;
-  border-radius: 2px;
-  cursor: pointer;
-  z-index: 1001;
-}
-
-/* === Sidebar Hidden by Default === */
-.sidebar {
-  display: none;
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 240px;
-  height: 100%;
-  background-color: var(--nature-green);
-  color: var(--white);
-  padding: 1.5rem 1rem;
-  z-index: 1000;
-  overflow-y: auto;
-}
-
-.sidebar.active {
-  display: block;
-}
-
-/* === Next Page Button (Floating Right) === */
-.next-page {
-  position: fixed;
-  bottom: 2rem;       /* floats above footer */
-  right: 2rem;        /* aligned to right side */
-  background: var(--accent-blue);
-  color: var(--white);
-  padding: 0.75rem 1.25rem;
-  border-radius: 6px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-  z-index: 999;
-}
-
-.next-page a {
-  color: var(--white);
-  font-weight: 600;
-  text-decoration: none;
-}
-
-.next-page a:hover {
-  text-decoration: underline;
-  color: var(--pale-green);
-}
-/* === Popup Notification === */
-.popup {
-  position: fixed;
-  bottom: 2rem;
-  right: 2rem;
-  background-color: var(--accent-blue);
-  color: var(--white);
-  padding: 1rem 1.5rem;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-  display: none;
-  align-items: center;
-  gap: 1rem;
-  z-index: 1000;
-  font-weight: 500;
-}
-
-.popup.active {
-  display: flex;
-}
-
-.popup-close {
-  background: transparent;
-  border: none;
-  color: var(--white);
-  font-size: 1.2rem;
-  cursor: pointer;
-}
-/* === Recommendations Page === */
-.page-header {
-  text-align: center;
-  margin-bottom: 2rem;
-}
-
-.page-header h1 {
-  font-size: 2rem;
-  color: var(--deep-blue);
-}
-
-.page-header .subtitle {
-  color: var(--text-gray);
-  font-size: 1rem;
-}
-
-/* Card containers */
+/* === Cards === */
 .card {
   background: var(--white);
   padding: 1.5rem;
@@ -347,102 +159,39 @@ main {
   box-shadow: 0 2px 6px rgba(0,0,0,0.1);
   margin-bottom: 2rem;
 }
+.card h2 { margin-bottom: 1rem; color: var(--deep-blue); }
 
-.card h2 {
-  margin-bottom: 1rem;
-  color: var(--deep-blue);
-}
-
-/* Table styling for recommendations */
-.styled-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 0.95rem;
-  background: var(--white);
-  border: 1px solid var(--border-gray);
-  border-radius: 8px;
-  overflow: hidden;
-}
-
-.styled-table th {
-  background-color: var(--deep-blue);
-  color: var(--white);
-  padding: 0.75rem;
-  text-align: left;
-}
-
-.styled-table td {
-  border-top: 1px solid var(--border-gray);
-  padding: 0.75rem;
-  color: var(--text-gray);
-}
-
-.styled-table tr:nth-child(even) {
-  background-color: var(--soft-blue);
-}
-
-@media (max-width: 768px) {
-  .styled-table {
-    display: block;
-    overflow-x: auto;
-    white-space: nowrap;
-  }
-}
-
-/* Table header with export button */
-.table-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1rem;
-}
-
-/* Risk badges */
+/* === Badges === */
 .badge {
   padding: 0.3rem 0.6rem;
   border-radius: 4px;
   font-weight: 600;
   color: var(--white);
 }
+.badge.low { background: var(--nature-green); }
+.badge.medium { background: var(--warning-amber); }
+.badge.high { background: var(--danger-red); }
 
-.badge.low {
-  background: var(--nature-green);
-}
-
-.badge.medium {
-  background: #FFC107; /* amber */
-}
-
-.badge.high {
-  background: #F44336; /* red */
-}
-
-/* Recommendation tags */
+/* === Recommendation Tags === */
 .tag {
   display: inline-block;
-  background: var(--soft-blue);
-  color: var(--deep-blue);
   padding: 0.3rem 0.6rem;
   border-radius: 12px;
   margin: 0.2rem;
   font-size: 0.85rem;
   font-weight: 500;
+  color: var(--white);
 }
+.tag.water { background: var(--accent-blue); }
+.tag.health { background: var(--danger-red); }
+.tag.infrastructure { background: #9C27B0; }
+.tag.education { background: var(--nature-green); }
+.tag.poverty { background: var(--warning-amber); }
+.tag.community { background: #795548; }
+.tag.general { background: var(--dark-gray); }
 
-/* Heatmap legend */
-.legend {
-  margin-top: 0.5rem;
-  display: flex;
-  gap: 1rem;
-  font-size: 0.85rem;
-}
-
-.legend-item.low { color: var(--nature-green); font-weight: 600; }
-.legend-item.medium { color: #FFC107; font-weight: 600; }
-.legend-item.high { color: #F44336; font-weight: 600; }
-
-/* Toast notification */
-.toast {
+/* === Notifications === */
+.toast, .popup {
   display: none;
   position: fixed;
   bottom: 20px;
@@ -455,6 +204,17 @@ main {
   box-shadow: 0 2px 6px rgba(0,0,0,0.2);
   z-index: 1000;
 }
-
 .toast.success { background: var(--nature-green); }
-.toast.error { background: #F44336; }
+.toast.error { background: var(--danger-red); }
+.popup.active { display: flex; align-items: center; gap: 1rem; }
+.popup-close { background: transparent; border: none; color: var(--white); font-size: 1.2rem; cursor: pointer; }
+
+/* === Footer === */
+.site-footer {
+  background-color: var(--nature-green);
+  color: var(--white);
+  padding: 1.5rem 1rem;
+  text-align: center;
+}
+.site-footer a { color: var(--white); margin: 0 0.5rem; text-decoration: none; font-weight: 500; }
+.site-footer a:hover { color: var(--pale-green); text-decoration: underline; }
