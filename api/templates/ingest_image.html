@@ -3,7 +3,7 @@
 <h1>Image Reports</h1>
 <p>Upload an image to generate an environment-based prediction.</p>
 
-<form id="imageForm" enctype="multipart/form-data" class="filters">
+<form id="imageForm" method="post" action="/ingest/image" enctype="multipart/form-data" class="filters">
   <label>Image file</label>
   <input type="file" name="file" accept="image/*" required>
 
@@ -12,6 +12,8 @@
 
   <label>Longitude</label>
   <input type="text" id="lonInput" name="lon" placeholder="Auto-detected">
+
+  <!-- Hidden field ensures backend receives mode -->
   <input type="hidden" name="mode" value="json">
 
   <button type="submit">Upload</button>
