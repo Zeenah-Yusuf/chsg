@@ -6,10 +6,56 @@
 </nav>
 
 <h1>National Prediction (NDHS)</h1>
-<p>Select indicators below to run a national‑level prediction.</p>
+<p>Select a state and indicators below to run a national‑level prediction.</p>
 
-<!-- Indicator Selection -->
+<!-- NDHS Prediction Form -->
 <form id="ndhsForm">
+  <!-- State Selection -->
+  <div class="state-select">
+    <label for="state">Choose State:</label>
+    <select id="state" name="state" required>
+      <option value="">-- Select a state --</option>
+      <option value="Abia">Abia</option>
+      <option value="Adamawa">Adamawa</option>
+      <option value="Akwa Ibom">Akwa Ibom</option>
+      <option value="Anambra">Anambra</option>
+      <option value="Bauchi">Bauchi</option>
+      <option value="Bayelsa">Bayelsa</option>
+      <option value="Benue">Benue</option>
+      <option value="Borno">Borno</option>
+      <option value="Cross River">Cross River</option>
+      <option value="Delta">Delta</option>
+      <option value="Ebonyi">Ebonyi</option>
+      <option value="Edo">Edo</option>
+      <option value="Ekiti">Ekiti</option>
+      <option value="Enugu">Enugu</option>
+      <option value="FCT">FCT</option>
+      <option value="Gombe">Gombe</option>
+      <option value="Imo">Imo</option>
+      <option value="Jigawa">Jigawa</option>
+      <option value="Kaduna">Kaduna</option>
+      <option value="Kano">Kano</option>
+      <option value="Katsina">Katsina</option>
+      <option value="Kebbi">Kebbi</option>
+      <option value="Kogi">Kogi</option>
+      <option value="Kwara">Kwara</option>
+      <option value="Lagos">Lagos</option>
+      <option value="Nasarawa">Nasarawa</option>
+      <option value="Niger">Niger</option>
+      <option value="Ogun">Ogun</option>
+      <option value="Ondo">Ondo</option>
+      <option value="Osun">Osun</option>
+      <option value="Oyo">Oyo</option>
+      <option value="Plateau">Plateau</option>
+      <option value="Rivers">Rivers</option>
+      <option value="Sokoto">Sokoto</option>
+      <option value="Taraba">Taraba</option>
+      <option value="Yobe">Yobe</option>
+      <option value="Zamfara">Zamfara</option>
+    </select>
+  </div>
+
+  <!-- Indicator Selection -->
   <div class="indicator-select">
     <label for="indicator">Choose Indicator:</label>
     <select id="indicator" name="indicator" required>
@@ -25,6 +71,7 @@
     </select>
   </div>
 
+  <!-- Value Input -->
   <div class="value-input">
     <label for="value">Enter Value:</label>
     <input type="number" id="value" name="value" step="0.01" required />
@@ -39,6 +86,7 @@
 <script>
   document.getElementById("ndhsForm").addEventListener("submit", async (e) => {
     e.preventDefault();
+    const state = document.getElementById("state").value;
     const indicator = document.getElementById("indicator").value;
     const value = document.getElementById("value").value;
 
@@ -46,13 +94,13 @@
       const res = await fetch("/predict/ndhs", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ indicator, value })
+        body: JSON.stringify({ state, indicator, value })
       });
 
       if (!res.ok) throw new Error("Prediction failed");
       const result = await res.json();
       document.getElementById("predictionResult").innerHTML =
-        `<p><strong>Prediction Result:</strong> ${result.prediction}</p>`;
+        `<p><strong>Prediction Result for ${state}:</strong> ${result.prediction}</p>`;
       showToast(" NDHS prediction completed", "info");
     } catch (err) {
       console.error(err);
