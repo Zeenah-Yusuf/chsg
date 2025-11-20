@@ -323,3 +323,138 @@ main {
   font-size: 1.2rem;
   cursor: pointer;
 }
+/* === Recommendations Page === */
+.page-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.page-header h1 {
+  font-size: 2rem;
+  color: var(--deep-blue);
+}
+
+.page-header .subtitle {
+  color: var(--text-gray);
+  font-size: 1rem;
+}
+
+/* Card containers */
+.card {
+  background: var(--white);
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  margin-bottom: 2rem;
+}
+
+.card h2 {
+  margin-bottom: 1rem;
+  color: var(--deep-blue);
+}
+
+/* Table styling for recommendations */
+.styled-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+  background: var(--white);
+  border: 1px solid var(--border-gray);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.styled-table th {
+  background-color: var(--deep-blue);
+  color: var(--white);
+  padding: 0.75rem;
+  text-align: left;
+}
+
+.styled-table td {
+  border-top: 1px solid var(--border-gray);
+  padding: 0.75rem;
+  color: var(--text-gray);
+}
+
+.styled-table tr:nth-child(even) {
+  background-color: var(--soft-blue);
+}
+
+@media (max-width: 768px) {
+  .styled-table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+}
+
+/* Table header with export button */
+.table-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+/* Risk badges */
+.badge {
+  padding: 0.3rem 0.6rem;
+  border-radius: 4px;
+  font-weight: 600;
+  color: var(--white);
+}
+
+.badge.low {
+  background: var(--nature-green);
+}
+
+.badge.medium {
+  background: #FFC107; /* amber */
+}
+
+.badge.high {
+  background: #F44336; /* red */
+}
+
+/* Recommendation tags */
+.tag {
+  display: inline-block;
+  background: var(--soft-blue);
+  color: var(--deep-blue);
+  padding: 0.3rem 0.6rem;
+  border-radius: 12px;
+  margin: 0.2rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+/* Heatmap legend */
+.legend {
+  margin-top: 0.5rem;
+  display: flex;
+  gap: 1rem;
+  font-size: 0.85rem;
+}
+
+.legend-item.low { color: var(--nature-green); font-weight: 600; }
+.legend-item.medium { color: #FFC107; font-weight: 600; }
+.legend-item.high { color: #F44336; font-weight: 600; }
+
+/* Toast notification */
+.toast {
+  display: none;
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: var(--dark-gray);
+  color: var(--white);
+  padding: 12px 20px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  z-index: 1000;
+}
+
+.toast.success { background: var(--nature-green); }
+.toast.error { background: #F44336; }
