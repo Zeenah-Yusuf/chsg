@@ -478,28 +478,41 @@ async def run_combined(
 # ---------- Predictions: NDHS (AJAX FormData) ----------
 @app.post("/predict/ndhs")
 async def run_ndhs(request: Request):
-    data = await request.json()
-    indicator = data.get("indicator")
-    value = float(data.get("value"))
+    try:
+        data = await request.json()
+        state = data.get("state")
+        indicator = data.get("indicator")
+        value = float(data.get("value"))
 
-    cat_weight = 0.3 if "unsafe" in indicator.lower() else 0.15
-    risk_score = compute_risk_score(lat=0.0, lon=0.0, unsafe_flag=1, category_weight=cat_weight)
-    is_risky = risk_score >= 0.5
+        if not state or not indicator:
+            raise HTTPException(status_code=400, detail="State and indicator are required")
 
-    record = {
-        "date": datetime.now(LOCAL_TZ).strftime("%Y-%m-%d %H:%M:%S"),
-        "indicator": indicator,
-        "value": value,
-        "category": "ndhs_prediction",
-        "is_risky": is_risky,
-        "risk_score": risk_score,
-        "source": "ndhs",
-    }
-    write_latest_risk(record)
-    return {"prediction": "Risky" if is_risky else "Safe", "record": record}
-    return RedirectResponse(url="/dashboard?msg=Prediction complete! Go to Dashboard to view.", status_code=303)
-# ---------- Risk data ----------
+        # Simple heuristic for demo
+        cat_weight = 0.3 if "unsafe" in indicator.lower() else 0.15
+        riskscore = computeriskscore(lat=0.0, lon=0.0, unsafeflag=1, categoryweight=catweight)
+        isrisky = riskscore >= 0.5
 
+        record = {
+            "date": datetime.now(LOCAL_TZ).strftime("%Y-%m-%d %H:%M:%S"),
+            "state": state,
+            "indicator": indicator,
+            "value": value,
+            "category": "ndhs_prediction",
+            "isrisky": isrisky,
+            "riskscore": riskscore,
+            "source": "ndhs",
+        }
+
+        writelatestrisk(record)
+
+        return {
+            "prediction": "Risky" if is_risky else "Safe",
+            "record": record
+        }
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"NDHS prediction error: {e}")
+#------------ Risk Data ---------#
 @app.get("/risk/latest")
 def risk_latest():
     return read_latest_risk(limit=200)
