@@ -555,7 +555,7 @@ async def run_combined(
         )
 # ---------- Predictions: NDHS (AJAX FormData) ----------
 @app.post("/predict/ndhs")
-async def run_ndhs(request: Request):
+async def run_ndhs(request: Request, mode: str = "json"):
     try:
         data = await request.json()
         state = data.get("state")
@@ -568,7 +568,7 @@ async def run_ndhs(request: Request):
         # Simple heuristic for demo
         cat_weight = 0.3 if "unsafe" in indicator.lower() else 0.15
         risk_score = compute_risk_score(lat=0.0, lon=0.0, unsafe_flag=1, category_weight=cat_weight)
-        is_risky = risks_core >= 0.5
+        is_risky = risk_score >= 0.5
 
         record = {
             "date": datetime.now(LOCAL_TZ).strftime("%Y-%m-%d %H:%M:%S"),
@@ -581,7 +581,10 @@ async def run_ndhs(request: Request):
             "source": "ndhs",
         }
 
-        writelatestrisk(record)
+        # Correct function name
+        write_latest_risk(record)
+
+        # Decide response mode
         if mode == "html":
             return templates.TemplateResponse(
                 "predict_ndhs.html",
@@ -592,7 +595,6 @@ async def run_ndhs(request: Request):
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"NDHS prediction error: {e}")
-
 
 @app.get("/risk/latest")
 def risk_latest():
