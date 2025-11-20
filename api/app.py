@@ -338,19 +338,19 @@ from fastapi import Form
 from fastapi.responses import JSONResponse
 
 # ---------- Ingestion: Text (AJAX JSON) ----------
-from fastapi import Request, Form, HTTPException
-from datetime import datetime
 
 @app.post("/ingest/text")
 async def ingest_text(
     request: Request,
-    payload: TextIngest,
-    mode: str = Form("json")  # mode comes from form data, default is "json"
+    text: str = Form(...),
+    lat: float = Form(0.0),
+    lon: float = Form(0.0),
+    mode: str = Form("json")
 ):
     try:
-        text = safe_str(payload.text)
-        lat = to_float(payload.lat)
-        lon = to_float(payload.lon)
+        text = safe_str(text)
+        lat = to_float(lat)
+        lon = to_float(lon)
 
         lower = text.lower()
         if any(k in lower for k in ["cholera", "diarrhea", "diarrhoea"]):
@@ -386,16 +386,21 @@ async def ingest_text(
                 "ingest_text.html",
                 {"request": request, "risk_score": risk_score, "is_risky": is_risky}
             )
-        else:  # default JSON
+        else:
             return {"prediction": "Risky" if is_risky else "Safe", "record": record}
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Text prediction error: {e}")
 
+
 # ---------- Ingestion: Voice (Transcript JSON) ----------
-from fastapi import Body
+from fastapi import Body, Query
+
 @app.post("/ingest/voice")
-async def ingest_voice(payload: dict = Body(...)):
+async def ingest_voice(
+    payload: dict = Body(...),
+    mode: str = Query("json")  # default to JSON, can override with ?mode=html
+):
     """
     Accepts a JSON payload with transcript text and optional lat/lon.
     Example:
@@ -406,43 +411,41 @@ async def ingest_voice(payload: dict = Body(...)):
       "source": "voice"
     }
     """
-    text = safe_str(payload.get("text", ""))
-    lat = to_float(payload.get("lat", 0.0))
-    lon = to_float(payload.get("lon", 0.0))
-    source = payload.get("source", "voice")
-
-    # Simple heuristic: detect Nigerian languages keywords
-    lower = text.lower()
-    if any(k in lower for k in ["cholera", "diarrhea", "diarrhoea"]):
-        category, cat_weight = "waterborne_cholera", 0.4
-    elif "typhoid" in lower:
-        category, cat_weight = "waterborne_typhoid", 0.35
-    elif any(k in lower for k in ["flood", "river overflow", "contamination"]):
-        category, cat_weight = "environmental_risk", 0.25
-    else:
-        category, cat_weight = "voice_report", 0.2
-
-    # Risk score heuristic
-    risk_score = compute_risk_score(lat, lon, unsafe_flag=1 if "unsafe" in lower else 0, category_weight=cat_weight)
-    is_risky = risk_score >= 0.5
-
-    record = {
-        "date": datetime.now(LOCAL_TZ).strftime("%Y-%m-%d %H:%M:%S"),
-        "lat": lat,
-        "lon": lon,
-        "category": category,
-        "is_risky": is_risky,
-        "risk_score": risk_score,
-        "source": source,
-        "text": text,
-    }
-
     try:
+        text = safe_str(payload.get("text", ""))
+        lat = to_float(payload.get("lat", 0.0))
+        lon = to_float(payload.get("lon", 0.0))
+        source = payload.get("source", "voice")
+
+        lower = text.lower()
+        if any(k in lower for k in ["cholera", "diarrhea", "diarrhoea"]):
+            category, cat_weight = "waterborne_cholera", 0.4
+        elif "typhoid" in lower:
+            category, cat_weight = "waterborne_typhoid", 0.35
+        elif any(k in lower for k in ["flood", "river overflow", "contamination"]):
+            category, cat_weight = "environmental_risk", 0.25
+        else:
+            category, cat_weight = "voice_report", 0.2
+
+        risk_score = compute_risk_score(lat, lon, unsafe_flag=1 if "unsafe" in lower else 0, category_weight=cat_weight)
+        is_risky = risk_score >= 0.5
+
+        record = {
+            "date": datetime.now(LOCAL_TZ).strftime("%Y-%m-%d %H:%M:%S"),
+            "lat": lat,
+            "lon": lon,
+            "category": category,
+            "is_risky": is_risky,
+            "risk_score": risk_score,
+            "source": source,
+            "text": text,
+        }
         write_latest_risk(record)
+
         if mode == "html":
             return templates.TemplateResponse(
                 "ingest_voice.html",
-                {"request": request, "risk_score": risk_score, "is_risky": is_risky}
+                {"request": None, "risk_score": risk_score, "is_risky": is_risky}
             )
         else:
             return {"prediction": "Risky" if is_risky else "Safe", "record": record}
