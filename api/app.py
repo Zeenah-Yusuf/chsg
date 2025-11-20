@@ -509,7 +509,7 @@ async def run_combined(
 ):
     lat = to_float(Location_of_households_Latitude)
     lon = to_float(Location_of_households_Longitude)
-    unsafe = to_int(UnsafeWa@app.post("/ingest/image")
+    unsafe = to_int(UnsafeWater)
 
 
     source_weight_map = {
