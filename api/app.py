@@ -198,24 +198,57 @@ def recommendations(request: Request):
 
         for _, row in grouped.iterrows():
             recs = []
+
+            # Risk-based recommendations
             if row["avg_risk"] > 0.7:
-                recs.append("Deploy rapid response teams")
-            if row["avg_risk"] > 0.5:
-                recs.append("Increase chlorine supply")
+                recs.append({"text": "Deploy rapid response health teams", "category": "Health"})
+                recs.append({"text": "Set up emergency water purification units", "category": "Water"})
+            elif row["avg_risk"] > 0.5:
+                recs.append({"text": "Scale up chlorine and water treatment supplies", "category": "Water"})
+                recs.append({"text": "Inspect and repair boreholes/wells", "category": "Infrastructure"})
+            else:
+                recs.append({"text": "Maintain routine water quality monitoring", "category": "Water"})
+
             if row["reports"] > 10:
-                recs.append("Conduct community awareness campaigns")
+                recs.append({"text": "Conduct community awareness campaigns", "category": "Community"})
+
+            # NDHS indicator-based recommendations (if present in dataset)
+            if "UnsafeWaterHouseholds" in df.columns and row.get("UnsafeWaterHouseholds", 0) > 30:
+                recs.append({"text": "Expand safe water access programs", "category": "Water"})
+
+            if "ChildMortalityRate" in df.columns and row.get("ChildMortalityRate", 0) > 50:
+                recs.append({"text": "Strengthen maternal & child health services", "category": "Health"})
+
+            if "MaternalMortalityRate" in df.columns and row.get("MaternalMortalityRate", 0) > 500:
+                recs.append({"text": "Improve emergency obstetric care facilities", "category": "Health"})
+
+            if "MalnutritionPrevalence" in df.columns and row.get("MalnutritionPrevalence", 0) > 20:
+                recs.append({"text": "Launch nutrition supplementation programs", "category": "Health"})
+
+            if "ImmunizationCoverage" in df.columns and row.get("ImmunizationCoverage", 0) < 70:
+                recs.append({"text": "Scale up immunization outreach campaigns", "category": "Health"})
+
+            if "SanitationAccess" in df.columns and row.get("SanitationAccess", 0) < 50:
+                recs.append({"text": "Invest in sanitation infrastructure", "category": "Infrastructure"})
+
+            if "LiteracyRate" in df.columns and row.get("LiteracyRate", 0) < 60:
+                recs.append({"text": "Expand community literacy and education programs", "category": "Education"})
+
+            if "PovertyIndex" in df.columns and row.get("PovertyIndex", 0) > 40:
+                recs.append({"text": "Implement targeted poverty alleviation schemes", "category": "Poverty"})
 
             state_summary.append({
                 "state": row["state"],
                 "avg_risk": round(row["avg_risk"], 2),
                 "reports": row["reports"],
-                "recommendations": recs or ["Monitor closely"]
+                "recommendations": recs or [{"text": "Monitor closely", "category": "General"}]
             })
 
     return templates.TemplateResponse(
         "recommendations.html",
         {"request": request, "state_summary": state_summary}
     )
+
 @app.get("/dashboard", response_class=HTMLResponse)
 def dashboard(request: Request):
     records = read_latest_risk(limit=500)
