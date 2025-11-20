@@ -61,18 +61,57 @@ main {
   color: var(--white);
   padding: 1.5rem 1rem;
   flex-shrink: 0;
+  position: fixed;
+  top: 0;
+  left: -240px; /* hidden by default */
+  height: 100%;
+  transition: left 0.3s ease;
+  z-index: 1000;
 }
-.sidebar.active { display: block; }
-.sidebar-brand h2 { font-size: 1.6rem; margin-bottom: 1.5rem; }
-.sidebar-nav { display: flex; flex-direction: column; gap: 0.75rem; }
+
+.sidebar.active {
+  left: 0; /* slides in */
+}
+
+.sidebar-brand h2 {
+  font-size: 1.6rem;
+  margin-bottom: 1.5rem;
+  color: var(--white);
+}
+
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
 .nav-link, .nav-sublink {
   color: var(--white);
   text-decoration: none;
   font-weight: 500;
   padding: 0.3rem 0;
 }
-.nav-link:hover, .nav-sublink:hover { color: var(--pale-green); text-decoration: underline; }
 
+.nav-link:hover, .nav-sublink:hover {
+  color: var(--pale-green);
+  text-decoration: underline;
+}
+
+/* === Sidebar Toggle Button === */
+.sidebar-toggle {
+  position: fixed;
+  top: 0.5rem;
+  left: 1rem;
+  background-color: var(--accent-blue);
+  color: var(--white);
+  border: none;
+  font-size: 1rem;
+  padding: 0.5rem 0.3rem;
+  border-radius: 4px;
+  cursor: pointer;
+  z-index: 1101; /* above sidebar */
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+}
 /* === Breadcrumb === */
 .breadcrumb {
   font-size: 0.95rem;
