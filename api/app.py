@@ -451,22 +451,10 @@ async def ingest_voice(payload: dict = Body(...)):
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Voice prediction error: {e}")
-# ---------- Ingestion: Image (AJAX FormData) ----------
-
-# ---------- Predictions: Combined (AJAX FormData) ----------
-@app.post("/predict/combined/run")
-async def run_combined(
-    Household_Water_Source: str = Form(...),
-    Location_of_households_Latitude: float = Form(0.0),
-    Location_of_households_Longitude: float = Form(0.0),
-    UnsafeWater: int = Form(0),
-    mode: str = Form("json")
-):
-    lat = to_float(Location_of_households_Latitude)
-    lon = to_float(Location_of_households_Longitude)
-    unsafe = to_int(UnsafeWa@app.post("/ingest/image")
+# ---------- Ingestion: Image (AJAX FormData
+@app.post("/ingest/image")
 async def ingest_image(
-    request: Request,   
+    request: Request,   # ✅ include request
     file: UploadFile = File(...),
     lat: float = Form(0.0),
     lon: float = Form(0.0),
@@ -484,8 +472,8 @@ async def ingest_image(
 
         category = "image_environment"
         cat_weight = 0.25 if brightness > 0.5 else 0.15
-        lat_f, lon_f = to_float(lat), to_float(lon)   
-        risk_score = compute_risk_score(lat_f, lon_f, unsafe_flag=0, category_weight=cat_weight) 
+        lat_f, lon_f = to_float(lat), to_float(lon)   # ✅ consistent naming
+        risk_score = compute_risk_score(lat_f, lon_f, unsafe_flag=0, category_weight=cat_weight)  # ✅ correct function name
         is_risky = risk_score >= 0.5
 
         record = {
@@ -509,7 +497,20 @@ async def ingest_image(
             return {"prediction": "Risky" if is_risky else "Safe", "record": record}
 
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Image prediction error: {e}")ter)
+        raise HTTPException(status_code=500, detail=f"Image prediction error: {e}")
+# ---------- Predictions: Combined (AJAX FormData) ----------
+@app.post("/predict/combined/run")
+async def run_combined(
+    Household_Water_Source: str = Form(...),
+    Location_of_households_Latitude: float = Form(0.0),
+    Location_of_households_Longitude: float = Form(0.0),
+    UnsafeWater: int = Form(0),
+    mode: str = Form("json")
+):
+    lat = to_float(Location_of_households_Latitude)
+    lon = to_float(Location_of_households_Longitude)
+    unsafe = to_int(UnsafeWa@app.post("/ingest/image")
+
 
     source_weight_map = {
         "Borehole": 0.15, "Tap": 0.1, "River": 0.35, "Well": 0.25, "Unknown": 0.2,
