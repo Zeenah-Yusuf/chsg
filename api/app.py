@@ -295,8 +295,20 @@ def run_combined(
         }
     }
     write_latest_risk(record)
-
-    return RedirectResponse(url="/dashboard", status_code=303)
+    predictions = {
+        "rf_prediction": 1 if is_risky else 0,
+        "xgb_prediction": 1 if (risk_score > 0.65) else 0,
+    }
+    # ✅ Decide response mode
+    if mode == "json":
+        return JSONResponse({"message": "Prediction complete", "record": record, "predictions": predictions})
+    elif mode == "redirect":
+        return RedirectResponse(url="/dashboard?msg=Prediction complete! Go to Dashboard to view.", status_code=303)
+    else:  # default: HTML with pop‑up
+        return templates.TemplateResponse(
+            "text_ingest.html",
+            {"request": request, "riskscore": riskscore, "isrisky": isrisky}
+        )
 # --- Ingestion pages (GET) ---
 
 @app.get("/ingest/text", response_class=HTMLResponse)
@@ -365,9 +377,16 @@ def ingest_text(payload: TextIngest):
         "text": text,
     }
     write_latest_risk(record)
-    return JSONResponse({"message": "Text ingested", "record": record})
-    return RedirectResponse(url="/dashboard?msg=Prediction complete! Go to Dashboard to view.", status_code=303)
+    if mode == "html":
+            return templates.TemplateResponse(
+                "text_ingest.html",
+                {"request": request, "riskscore": riskscore, "isrisky": isrisky}
+            )
+        else:
+            return {"prediction": "Risky" if is_risky else "Safe", "record": record}
 
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Text prediction error: {e}")
 # ---------- Ingestion: Voice (AJAX FormData) ----------
 # ---------- Ingestion: Voice (Transcript JSON) ----------
 from fastapi import Body
@@ -416,11 +435,16 @@ async def ingest_voice(payload: dict = Body(...)):
 
     try:
         write_latest_risk(record)
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to write record: {e}")
+        if mode == "html":
+            return templates.TemplateResponse(
+                "voice_ingest.html",
+                {"request": request, "riskscore": riskscore, "isrisky": isrisky}
+            )
+        else:
+            return {"prediction": "Risky" if is_risky else "Safe", "record": record}
 
-    return {"message": "Voice ingested", "record": record}
-    return RedirectResponse(url="/dashboard?msg=Prediction complete! Go to Dashboard to view.", status_code=303)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Voice prediction error: {e}")
 # ---------- Ingestion: Image (AJAX FormData) ----------
 @app.post("/ingest/image")
 async def ingest_image(
@@ -455,15 +479,16 @@ async def ingest_image(
             "meta": {"brightness": round(brightness, 3)},
         }
         write_latest_risk(record)
-        return JSONResponse({"message": "Image ingested", "record": record})
-    finally:
-        try:
-            if os.path.exists(tmp_path):
-                os.remove(tmp_path)
-        except Exception:
-            pass
-    return RedirectResponse(url="/dashboard?msg=Prediction complete! Go to Dashboard to view.", status_code=303)
+        if mode == "html":
+            return templates.TemplateResponse(
+                "image_ingest.html",
+                {"request": request, "riskscore": riskscore, "isrisky": isrisky}
+            )
+        else:
+            return {"prediction": "Risky" if is_risky else "Safe", "record": record}
 
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Image prediction error: {e}")
 # ---------- Predictions: Combined (AJAX FormData) ----------
 @app.post("/predict/combined/run")
 async def run_combined(
@@ -498,15 +523,22 @@ async def run_combined(
         },
     }
     write_latest_risk(record)
+    
 
     predictions = {
         "rf_prediction": 1 if is_risky else 0,
         "xgb_prediction": 1 if (risk_score > 0.65) else 0,
     }
-    return JSONResponse({"message": "Prediction complete", "record": record, "predictions": predictions})
-    return RedirectResponse(url="/dashboard?msg=Prediction complete! Go to Dashboard to view.", status_code=303)
-
-
+    # ✅ Decide response mode
+    if mode == "json":
+        return JSONResponse({"message": "Prediction complete", "record": record, "predictions": predictions})
+    elif mode == "redirect":
+        return RedirectResponse(url="/dashboard?msg=Prediction complete! Go to Dashboard to view.", status_code=303)
+    else:  # default: HTML with pop‑up
+        return templates.TemplateResponse(
+            "text_ingest.html",
+            {"request": request, "riskscore": riskscore, "isrisky": isrisky}
+        )
 # ---------- Predictions: NDHS (AJAX FormData) ----------
 @app.post("/predict/ndhs")
 async def run_ndhs(request: Request):
@@ -536,15 +568,18 @@ async def run_ndhs(request: Request):
         }
 
         writelatestrisk(record)
-
-        return {
-            "prediction": "Risky" if is_risky else "Safe",
-            "record": record
-        }
+        if mode == "html":
+            return templates.TemplateResponse(
+                "text_ingest.html",
+                {"request": request, "riskscore": riskscore, "isrisky": isrisky}
+            )
+        else:  # default JSON for AJAX
+            return {"prediction": "Risky" if is_risky else "Safe", "record": record}
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"NDHS prediction error: {e}")
-#------------ Risk Data ---------#
+
+
 @app.get("/risk/latest")
 def risk_latest():
     return read_latest_risk(limit=200)
