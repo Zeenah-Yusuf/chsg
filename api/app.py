@@ -347,8 +347,15 @@ from fastapi import Form
 from fastapi.responses import JSONResponse
 
 # ---------- Ingestion: Text (AJAX JSON) ----------
+from fastapi import Request, Form, HTTPException
+from datetime import datetime
+
 @app.post("/ingest/text")
-def ingest_text(request: Request, payload: TextIngest, mode: str = "json"):
+async def ingest_text(
+    request: Request,
+    payload: TextIngest,
+    mode: str = Form("json")  # mode comes from form data, default is "json"
+):
     try:
         text = safe_str(payload.text)
         lat = to_float(payload.lat)
@@ -388,7 +395,7 @@ def ingest_text(request: Request, payload: TextIngest, mode: str = "json"):
                 "ingest_text.html",
                 {"request": request, "risk_score": risk_score, "is_risky": is_risky}
             )
-        else:
+        else:  # default JSON
             return {"prediction": "Risky" if is_risky else "Safe", "record": record}
 
     except Exception as e:
@@ -504,55 +511,73 @@ async def ingest_image(
 
 @app.post("/predict/combined/run")
 async def run_combined(
+    request: Request,
     Household_Water_Source: str = Form(...),
     Location_of_households_Latitude: float = Form(0.0),
     Location_of_households_Longitude: float = Form(0.0),
     UnsafeWater: int = Form(0),
     mode: str = Form("json")
 ):
-    lat = to_float(Location_of_households_Latitude)
-    lon = to_float(Location_of_households_Longitude)
-    unsafe = to_int(UnsafeWater)
+    try:
+        # Convert inputs safely
+        lat = to_float(Location_of_households_Latitude)
+        lon = to_float(Location_of_households_Longitude)
+        unsafe = to_int(UnsafeWater)
 
+        # Weight mapping
+        source_weight_map = {
+            "Borehole": 0.15,
+            "Tap": 0.1,
+            "River": 0.35,
+            "Well": 0.25,
+            "Unknown": 0.2,
+        }
+        cat_weight = source_weight_map.get(Household_Water_Source or "Unknown", 0.2)
 
-    source_weight_map = {
-        "Borehole": 0.15, "Tap": 0.1, "River": 0.35, "Well": 0.25, "Unknown": 0.2,
-    }
-    cat_weight = source_weight_map.get(Household_Water_Source or "Unknown", 0.2)
+        # Compute risk
+        risk_score = compute_risk_score(lat, lon, unsafe_flag=unsafe, category_weight=cat_weight)
+        is_risky = risk_score >= 0.5
 
-    risk_score = compute_risk_score(lat, lon, unsafe_flag=unsafe, category_weight=cat_weight)
-    is_risky = risk_score >= 0.5
+        # Build record
+        record = {
+            "date": datetime.now(LOCAL_TZ).strftime("%Y-%m-%d %H:%M:%S"),
+            "lat": lat,
+            "lon": lon,
+            "category": f"combined_{Household_Water_Source or 'Unknown'}",
+            "is_risky": is_risky,
+            "risk_score": risk_score,
+            "source": "combined",
+            "features": {
+                "Household Water Source": Household_Water_Source,
+                "UnsafeWater": unsafe,
+            },
+        }
 
-    record = {
-        "date": datetime.now(LOCAL_TZ).strftime("%Y-%m-%d %H:%M:%S"),
-        "lat": lat,
-        "lon": lon,
-        "category": f"combined_{Household_Water_Source or 'Unknown'}",
-        "is_risky": is_risky,
-        "risk_score": risk_score,
-        "source": "combined",
-        "features": {
-            "Household Water Source": Household_Water_Source,
-            "UnsafeWater": unsafe,
-        },
-    }
-    write_latest_risk(record)
-    
+        # Save record
+        write_latest_risk(record)
 
-    predictions = {
-        "rf_prediction": 1 if is_risky else 0,
-        "xgb_prediction": 1 if (risk_score > 0.65) else 0,
-    }
-    # Decide response mode
-    if mode == "json":
-        return JSONResponse({"message": "Prediction complete", "record": record, "predictions": predictions})
-    elif mode == "redirect":
-        return RedirectResponse(url="/dashboard?msg=Prediction complete! Go to Dashboard to view.", status_code=303)
-    else:  # default: HTML with pop‑up
-        return templates.TemplateResponse(
-            "predict_combined.html",
-            {"request": request, "risk_score": risk_score, "is_risky": is_risky}
-        )
+        # Predictions
+        predictions = {
+            "rf_prediction": 1 if is_risky else 0,
+            "xgb_prediction": 1 if (risk_score > 0.65) else 0,
+        }
+
+        # Decide response mode
+        if mode == "json":
+            return JSONResponse({"message": "Prediction complete", "record": record, "predictions": predictions})
+        elif mode == "redirect":
+            return RedirectResponse(
+                url="/dashboard?msg=Prediction complete! Go to Dashboard to view.",
+                status_code=303
+            )
+        else:  # default: HTML with pop‑up
+            return templates.TemplateResponse(
+                "predict_combined.html",
+                {"request": request, "risk_score": risk_score, "is_risky": is_risky}
+            )
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Combined prediction error: {e}")
 # ---------- Predictions: NDHS (AJAX FormData) ----------
 @app.post("/predict/ndhs")
 async def run_ndhs(request: Request, mode: str = "json"):
