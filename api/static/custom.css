@@ -62,14 +62,22 @@ main {
   padding: 1.5rem 1rem;
   position: fixed;
   top: 0;
-  left: -240px; /* hidden by default */
+  left: 0;
   height: 100%;
-  transition: left 0.3s ease;
   z-index: 1000;
+  overflow-y: auto;
+  display: none;              
 }
 
 .sidebar.active {
-  left: 0; /* slides in */
+  display: block;             /* only shows when toggled */
+  animation: slideIn 0.3s ease forwards;
+}
+
+/* Smooth slide-in animation */
+@keyframes slideIn {
+  from { transform: translateX(-240px); }
+  to   { transform: translateX(0); }
 }
 
 /* Optional: shift main content when sidebar is active */
@@ -107,19 +115,18 @@ body.sidebar-open .main-content {
 /* === Sidebar Toggle Button === */
 .sidebar-toggle {
   position: fixed;
-  top: 0.5rem;
+  top: 0.75rem;
   left: 1rem;
   background-color: var(--accent-blue);
   color: var(--white);
   border: none;
   font-size: 1rem;
-  padding: 0.5rem 0.3rem;
+  padding: 0.5rem 0.75rem;
   border-radius: 4px;
   cursor: pointer;
   z-index: 1101; /* above sidebar */
   box-shadow: 0 2px 6px rgba(0,0,0,0.2);
 }
-
 
 /* === Breadcrumb === */
 .breadcrumb {
