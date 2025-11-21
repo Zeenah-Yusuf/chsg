@@ -4,21 +4,21 @@
 <p>Submit a text report to generate a risk prediction.</p>
 
 <form id="textForm" class="filters">
-  <label>Report text</label>
-  <input type="text" name="text" placeholder="Cholera outbreak near river" required>
+  <label for="textInput">Report text</label>
+  <input type="text" id="textInput" name="text" placeholder="Cholera outbreak near river" required>
 
-  <label>Latitude</label>
+  <label for="latInput">Latitude</label>
   <input type="text" id="latInput" name="lat" placeholder="Auto-detected">
 
-  <label>Longitude</label>
+  <label for="lonInput">Longitude</label>
   <input type="text" id="lonInput" name="lon" placeholder="Auto-detected">
-  <input type="hidden" name="mode" value="json">
 
+  <input type="hidden" name="mode" value="json">
   <button type="submit">Submit</button>
 </form>
 
 <script>
-//  Auto-fill lat/lon using browser geolocation
+// Auto-fill lat/lon using browser geolocation
 if (navigator.geolocation) {
   navigator.geolocation.getCurrentPosition(
     pos => {
@@ -34,13 +34,11 @@ if (navigator.geolocation) {
 document.getElementById("textForm").addEventListener("submit", async function(e) {
   e.preventDefault();
   const formData = new FormData(e.target);
-  const payload = Object.fromEntries(formData.entries());
 
   try {
     const response = await fetch("/ingest/text", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
+      body: formData // send as FormData, no headers
     });
 
     if (!response.ok) {
@@ -52,11 +50,11 @@ document.getElementById("textForm").addEventListener("submit", async function(e)
 
     const result = await response.json();
 
-    //  Pop-up alert with risk score
-    alert("Prediction complete! Risk Score: " + result.record.risk_score +
-          " | Risky: " + (result.record.is_risky ? "Yes" : "No"));
+    // Show popup with prediction result
+    showPopup("Prediction complete! Risk Score: " + result.record.risk_score +
+              " | Risky: " + (result.record.is_risky ? "Yes" : "No"));
 
-    //  Update dashboard table if present
+    // Update dashboard table if present
     const table = document.querySelector(".risk-table tbody");
     if (table && result.record) {
       const r = result.record;
@@ -73,7 +71,7 @@ document.getElementById("textForm").addEventListener("submit", async function(e)
       table.prepend(row);
     }
 
-    //  Reset form after successful submission
+    // Reset form after success
     e.target.reset();
 
   } catch (err) {
