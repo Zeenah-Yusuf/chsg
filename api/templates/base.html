@@ -5,19 +5,14 @@
     <title>{{ title or "CHSG Multimodal Inference" }}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{{ url_for('static', path='custom.css') }}">
-    <script>
-        function toggleSidebar() {
-            document.querySelector('.sidebar').classList.toggle('active');
-        }
-    </script>
 </head>
 <body>
     <div class="layout">
         <!-- Sidebar Toggle -->
-        <button class="sidebar-toggle" onclick="toggleSidebar()">☰</button>
+        <button class="sidebar-toggle" onclick="toggleSidebar()">☰ Menu</button>
 
         <!-- Sidebar -->
-        <aside class="sidebar">
+        <aside class="sidebar" id="sidebar">
             <div class="sidebar-brand">
                 <h2>CHSG</h2>
             </div>
@@ -25,7 +20,7 @@
                 <a href="/" class="nav-link">Home</a>
                 <a href="/about" class="nav-link">About</a>
                 <a href="/contact" class="nav-link">Contact</a>
-                <a href="/recommendations">Recommendations</a>
+                <a href="/recommendations" class="nav-link">Recommendations</a>
                 <a href="/privacy" class="nav-link">Privacy Policy</a>
                 <a href="/terms" class="nav-link">Terms of Service</a>
 
@@ -46,7 +41,7 @@
         </aside>
 
         <!-- Main Content -->
-        <main>
+        <main class="main-content">
             {% if breadcrumb %}
             <nav class="breadcrumb">
                 <span>{{ breadcrumb }}</span>
@@ -75,12 +70,22 @@
             </p>
         </div>
     </footer>
-<!-- Popup Notification -->
-<div id="popup" class="popup">
-    <span id="popup-message"></span>
-    <button onclick="closePopup()" class="popup-close">×</button>
-</div>
+
+    <!-- Popup Notification -->
+    <div id="popup" class="popup">
+        <span id="popup-message"></span>
+        <button onclick="closePopup()" class="popup-close">×</button>
+    </div>
+
+    <!-- Scripts -->
     <script>
+        function toggleSidebar() {
+            const sidebar = document.getElementById("sidebar");
+            const body = document.body;
+            sidebar.classList.toggle("active");
+            body.classList.toggle("sidebar-open");
+        }
+
         function showPopup(message) {
             const popup = document.getElementById("popup");
             const msg = document.getElementById("popup-message");
@@ -88,7 +93,7 @@
             popup.classList.add("active");
             setTimeout(() => {
                 popup.classList.remove("active");
-            }, 5000); // auto-hide after 5 seconds
+            }, 5000);
         }
 
         function closePopup() {
