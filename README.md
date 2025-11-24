@@ -1,113 +1,209 @@
-# Community Health & Safety Guard (CHSG)
+## CHSG – AI-Powered Public Health Intelligence Platform
 
-CHSG is a multimodal risk detection system that ingests **text, voice, and image reports**, runs them through trained ML models, applies risk logic, and triggers alerts (WhatsApp/TTS). A Streamlit dashboard provides live monitoring, and a scheduled job generates daily summaries.
+### Overview
 
-## Project Structure
+CHSG is an AI-driven public health intelligence platform designed to predict, detect, and visualize waterborne disease risks in vulnerable communities. It leverages multimodal data ingestion—text, voice, and image—to generate real-time risk scores, map unsafe water sources, and provide actionable insights for health agencies, NGOs, and community workers. The project aims to transform disease surveillance from reactive reporting to predictive, data-driven intervention.
 
-project/ 
-├── api/ # FastAPI backend 
-│ └── app.py 
-├── dashboard/ # Streamlit dashboard 
-│ └── app.py 
-├── jobs/ # Scheduled jobs 
-│ ├── daily_summary.py 
-│ └── crontab 
-├── models/ # Trained ML models (.pkl) 
-├── schemas/ # JSON schemas for validation 
-├── data/ # Shared parquet files (latest_risk.parquet, daily_summary.parquet) 
-├── dockerfile/ 
-│ ├── Dockerfile # API 
-│ ├── Dashboard.Dockerfile # Dashboard 
-│ └── Jobs.Dockerfile # Jobs 
-├── docker-compose.yml 
-└── requirements.txt
 
-## Features
+### Problem Statement
 
-- **FastAPI backend**
-  - `/predict/ndhs` → Predict risk using NDHS model
-  - `/predict/combined` → Predict risk using combined model
-  - `/ingest/text` → Classify text reports
-  - `/ingest/voice` → Transcribe voice reports (Whisper)
-  - `/ingest/image` → Classify image reports (EfficientNet)
-  - `/latest_risk` → Serve latest risk records for dashboard
+Waterborne diseases such as cholera, typhoid, and diarrheal infections continue to cause high morbidity and mortality in Nigeria and across developing regions. Outbreak monitoring systems remain largely reactive, relying on delayed reporting and manual data collection. The absence of predictive intelligence results in late interventions and preventable loss of life.
 
-- **Streamlit dashboard**
-  - Displays headline metrics (households at risk, risk rate)
-  - Shows risk trend over time
-  - Maps geographic distribution of risky households
-  - Breaks down hazard categories
+CHSG addresses this gap by providing an early-warning, AI-powered platform capable of analyzing multimodal field inputs and generating predictive insights for rapid public health response.
 
-- **Jobs**
-  - `daily_summary.py` runs daily to aggregate risk counts
-  - Results saved into `data/daily_summary.parquet`
-  - Cron job inside container executes script at midnight
 
-## Setup
 
-### 1. Clone repo
-```bash
-git clone https://github.com/your-org/chsg.git
+### Key Features
+
+1. Multimodal Data Ingestion
+
+Accepts text-based reports from field workers.
+
+Supports multilingual voice reporting (Yoruba, Hausa, Igbo, English).
+
+Allows users to upload images of water sources for automated risk assessment.
+
+
+2. Predictive Analytics
+
+Machine learning models (Random Forest, XGBoost) generate risk scores.
+
+Heuristic rules complement model predictions to enhance accuracy.
+
+Identifies unsafe water points and emerging patterns.
+
+
+3. Interactive Dashboard
+
+Map-based visualization of high-risk locations.
+
+Filterable tables and charts for trend analysis.
+
+Exportable reports in Excel format.
+
+Real-time status indicators for field teams and health agencies.
+
+
+4. Automated Alerts
+
+SMS, email, and voice alerts to community leaders and response agencies.
+
+Configurable risk thresholds for notification triggers.
+
+
+5. Accessibility and Scalability
+
+Local language support to ensure usability at the community level.
+
+Cloud-ready architecture for rapid deployment across regions.
+
+Designed to integrate with national health information systems.
+
+
+
+
+### Impact
+
+CHSG enables institutions to detect risks earlier, intervene faster, and allocate resources more efficiently. By shifting public health efforts from reactive response to proactive prevention, the platform contributes to reducing cholera outbreaks, strengthening community resilience, and improving access to clean water.
+
+
+
+#### Target Users
+
+Government health agencies
+
+NGOs working in WASH and public health (UNICEF, WHO, WaterAid)
+
+Local water boards
+
+Community health workers
+
+Researchers and donor organizations
+
+
+
+
+#### Competitive Advantage
+
+CHSG stands out through its multimodal ingestion capability, real-time predictive analytics, local language support, and integrated visualization tools. Unlike traditional survey-based or text-only solutions, it is designed to function in real-world environments where literacy barriers, poor connectivity, and resource constraints limit traditional data collection.
+
+
+
+### System Workflow
+
+1. Communities report water-related concerns using text, voice, or images.
+
+
+2. Data is processed by ML models and heuristic rules.
+
+
+3. The system generates risk scores and flags high-risk water points.
+
+
+4. Results are visualized on the dashboard.
+
+
+5. Automated alerts are sent to the appropriate agencies for action.
+
+
+
+
+
+### Technology Stack
+
+Backend: Python, FastAPI
+
+Frontend: React
+
+Machine Learning: scikit-learn, XGBoost
+
+Database: MongoDB / PostgreSQL
+
+Cloud & Deployment: Docker, CI/CD ready
+
+Visualization: Map components, charts, filterable tables
+
+
+
+
+### Business Model
+
+SaaS subscription for government agencies and NGOs
+
+Freemium community reporting app
+
+Premium analytics dashboards for institutions
+
+Strategic partnerships with water boards and public health organizations
+
+
+
+
+### Project Structure
+
+chsg/
+│
+├── backend/              # API, ML models, data processing  
+├── frontend/             # User interface and dashboard  
+├── models/               # Saved ML models and heuristics  
+├── docs/                 # Supporting documents  
+├── scripts/              # Utility scripts  
+└── README.md             # Project documentation
+
+
+
+### How to Run the Project
+
+##### Clone the repository
+
+git clone https://github.com/Zeenah-Yusuf/chsg
 cd chsg
-2. Environment variables
-Create .env file in project root:
-USE_ALERT_STUB=true
-ALERT_RECIPIENT=whatsapp:+2348012345678
-TWILIO_ACCOUNT_SID=your_sid
-TWILIO_AUTH_TOKEN=your_token
-TWILIO_WHATSAPP_FROM=whatsapp:+14155238886
-3. Build containers
-docker-compose up –build
-Docker Services
-•	API → FastAPI backend at http://localhost:8000/docs
-•	Dashboard → Streamlit dashboard at http://localhost:8501
-•	Jobs → Cron container running daily_summary.py daily
 
-requirements.txt (Pinned Versions)
-fastapi==0.115.0
-uvicorn[standard]==0.30.1
-streamlit==1.39.0
-pandas==2.2.2
-numpy==1.26.4
-joblib==1.4.2
-scikit-learn==1.5.2
-xgboost==2.1.1
-transformers==4.44.2
-torch==2.2.2
-sentencepiece==0.2.0
-edge-tts==6.1.9
-soundfile==0.12.1
-librosa==0.10.2.post1
-Pillow==10.4.0
-opencv-python==4.10.0.84
-jsonschema==4.23.0
-python-dotenv==1.0.1
-twilio==9.2.3
-httpx==0.27.0
+##### Backend Setup
 
-Usage
-API
-curl -X POST http://localhost:8000/ingest/text \
-  -H "Content-Type: application/json" \
-  -d '{"text":"cholera outbreak near river", "lat":6.49, "lon":3.38}'
-Dashboard
-Visit http://localhost:8501 in your browser.
-Jobs
-Logs available in jobs container:
-docker logs chsg_jobs
+cd backend
+pip install -r requirements.txt
+uvicorn main:api.app --reload
 
-Data Flow
-1.	Reports ingested via API endpoints.
-2.	Predictions + risk flags generated by ML models.
-3.	Records saved into data/latest_risk.parquet.
-4.	Dashboard fetches /latest_risk or reads parquet directly.
-5.	Jobs run daily summary → data/daily_summary.parquet.
+##### Frontend Setup
 
-Extending
-•	Add new hazard mappings in image_classifier.py.
-•	Connect to a database (Postgres/SQLite) instead of parquet for persistence.
-•	Deploy with Kubernetes for scaling API and dashboard separately.
+cd frontend
+npm install
+npm start
 
-Maintainers
-•	Zeenah — Lead developer, Abuja 🇳🇬
-•	Contributions welcome via PRs.
+##### Access the dashboard at:
+
+http://localhost:1000
+
+
+
+### Future Enhancements
+
+Integration with IoT sensors for real-time water quality monitoring
+
+Satellite-based environmental risk modeling
+
+Mobile offline reporting app for low-connectivity areas
+
+Advanced geospatial analytics and heatmap forecasting
+
+
+
+### Contributing
+
+Contributions are welcome. Please open an issue or submit a pull request to discuss improvements, bugs, or features.
+
+
+
+### License
+
+This project is licensed under the MIT License.
+
+
+
+### Contact
+
+For project inquiries:
+LinkedIn: Yusuf Zeenatudeen 
+Lead Engineer & Founder, CHSG
+Repository: https://github.com/Zeenah-Yusuf/chsg
