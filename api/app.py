@@ -464,16 +464,26 @@ async def ingest_image(
         with open(tmp_path, "wb") as f:
             f.write(content)
 
-        # Process image
-        img = Image.open(tmp_path).convert("RGB")
-        arr = np.array(img, dtype=np.uint8)
-        brightness = float(arr.mean()) / 255.0
+        # Run classifier
+        result = classify_image(tmp_path)
 
-        # Risk scoring
-        category = "image_environment"
-        cat_weight = 0.25 if brightness > 0.5 else 0.15
+        # Clean up temp file
+        os.remove(tmp_path)
+
+        if "error" in result:
+            raise HTTPException(status_code=400, detail=result["error"])
+
+        # Map classification to risk category
+        label = result["predicted_label"].lower()
+        if any(k in label for k in ["unsafe", "contaminated", "dirty", "flood", "stagnant"]):
+            category, cat_weight = "unsafe_water", 0.4
+            unsafe_flag = 1
+        else:
+            category, cat_weight = "safe_water", 0.1
+            unsafe_flag = 0
+
         lat_f, lon_f = to_float(lat), to_float(lon)
-        risk_score = compute_risk_score(lat_f, lon_f, unsafe_flag=0, category_weight=cat_weight)
+        risk_score = compute_risk_score(lat_f, lon_f, unsafe_flag=unsafe_flag, category_weight=cat_weight)
         is_risky = risk_score >= 0.5
 
         # Build record
@@ -485,7 +495,11 @@ async def ingest_image(
             "is_risky": is_risky,
             "risk_score": risk_score,
             "source": "image",
-            "meta": {"brightness": round(brightness, 3)},
+            "meta": {
+                "predicted_label": result["predicted_label"],
+                "confidence": round(result["confidence"], 3),
+                "top_classes": result.get("top_classes", [])
+            },
         }
         write_latest_risk(record)
 
@@ -493,14 +507,13 @@ async def ingest_image(
         if mode == "html":
             return templates.TemplateResponse(
                 "ingest_image.html",
-                {"request": request, "risk_score": risk_score, "is_risky": is_risky}
+                {"request": request, "risk_score": risk_score, "is_risky": is_risky, "record": record}
             )
         else:  # default JSON for AJAX
             return {"prediction": "Risky" if is_risky else "Safe", "record": record}
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Image prediction error: {e}")
-
 # ---------- Predictions: Combined (AJAX FormData) ----------
 
 @app.post("/predict/combined/run")
