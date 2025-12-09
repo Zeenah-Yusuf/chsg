@@ -338,15 +338,7 @@ from fastapi.responses import JSONResponse
 async def ingest_text(
     request: Request,
     text: str = Form(...),
-    lat: float = F@app.get("/ingest/voice", response_class=HTMLResponse)
-def ingest_voice_page(request: Request):
-    ffmpeg_ok = ffmpeg_available()
-    return templates.TemplateResponse("ingest_voice.html", {
-        "request": request,
-        "breadcrumb": "Voice Reports",
-        "next_page": {"url": "/dashboard", "label": "Dashboard"},
-        "ffmpeg_available": ffmpeg_ok
-    })orm(0.0),
+    lat: float = Form(0.0),
     lon: float = Form(0.0),
     mode: str = Form("json")
 ):
@@ -359,15 +351,7 @@ def ingest_voice_page(request: Request):
         if any(k in lower for k in ["cholera", "diarrhea", "diarrhoea"]):
             category, cat_weight = "waterborne_cholera", 0.4
         elif "typhoid" in lower:
-            category, cat_weight @app.get("/ingest/voice", response_class=HTMLResponse)
-def ingest_voice_page(request: Request):
-    ffmpeg_ok = ffmpeg_available()
-    return templates.TemplateResponse("ingest_voice.html", {
-        "request": request,
-        "breadcrumb": "Voice Reports",
-        "next_page": {"url": "/dashboard", "label": "Dashboard"},
-        "ffmpeg_available": ffmpeg_ok
-    })= "waterborne_typhoid", 0.35
+            category, cat_weight = "waterborne_typhoid", 0.35
         elif any(k in lower for k in ["flood", "river overflow", "contamination"]):
             category, cat_weight = "environmental_risk", 0.25
         else:
@@ -402,7 +386,6 @@ def ingest_voice_page(request: Request):
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Text prediction error: {e}")
-
 
 # ---------- Ingestion: Voice (Transcript JSON) ----------
 from fastapi import Body, Query
