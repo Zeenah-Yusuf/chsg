@@ -301,15 +301,6 @@ def predict_ndhs_page(request: Request):
         "next_page": {"url": "/dashboard", "label": "View Dashboard"}
     })
 # --- Ingestion pages (GET) ---
-
-@app.get("/ingest/text", response_class=HTMLResponse)
-def ingest_text_page(request: Request):
-    return templates.TemplateResponse("ingest_text.html", {
-        "request": request,
-        "breadcrumb": "Text Reports",
-        "next_page": {"url": "/dashboard", "label": "Dashboard"}
-    })
-
 @app.get("/ingest/voice", response_class=HTMLResponse)
 def ingest_voice_page(request: Request):
     ffmpeg_ok = ffmpeg_available()
@@ -319,6 +310,7 @@ def ingest_voice_page(request: Request):
         "next_page": {"url": "/dashboard", "label": "Dashboard"},
         "ffmpeg_available": ffmpeg_ok
     })
+
 
 @app.get("/ingest/image", response_class=HTMLResponse)
 def ingest_image_page(request: Request):
@@ -343,7 +335,15 @@ from fastapi.responses import JSONResponse
 async def ingest_text(
     request: Request,
     text: str = Form(...),
-    lat: float = Form(0.0),
+    lat: float = F@app.get("/ingest/voice", response_class=HTMLResponse)
+def ingest_voice_page(request: Request):
+    ffmpeg_ok = ffmpeg_available()
+    return templates.TemplateResponse("ingest_voice.html", {
+        "request": request,
+        "breadcrumb": "Voice Reports",
+        "next_page": {"url": "/dashboard", "label": "Dashboard"},
+        "ffmpeg_available": ffmpeg_ok
+    })orm(0.0),
     lon: float = Form(0.0),
     mode: str = Form("json")
 ):
@@ -395,27 +395,22 @@ async def ingest_text(
 
 # ---------- Ingestion: Voice (Transcript JSON) ----------
 from fastapi import Body, Query
-
 @app.post("/ingest/voice")
 async def ingest_voice(
     payload: dict = Body(...),
-    mode: str = Query("json")  # default to JSON, can override with ?mode=html
+    mode: str = Query("json")
 ):
-    """
-    Accepts a JSON payload with transcript text and optional lat/lon.
-    Example:
-    {
-      "text": "Cholera outbreak near river",
-      "lat": 9.0820,
-      "lon": 8.6753,
-      "source": "voice"
-    }
-    """
     try:
         text = safe_str(payload.get("text", ""))
         lat = to_float(payload.get("lat", 0.0))
         lon = to_float(payload.get("lon", 0.0))
         source = payload.get("source", "voice")
+        language = payload.get("language", None)  # Optional language hint
+
+        # Optional: re-transcribe if audio path is provided
+        # audio_path = payload.get("audio_path")
+        # if audio_path:
+        #     text = transcribe_audio(audio_path, language)
 
         lower = text.lower()
         if any(k in lower for k in ["cholera", "diarrhea", "diarrhoea"]):
