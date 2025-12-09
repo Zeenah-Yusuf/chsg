@@ -312,14 +312,16 @@ def ingest_voice_page(request: Request):
         "ffmpeg_available": ffmpeg_ok
     })
 
-
-@app.get("/ingest/image", response_class=HTMLResponse)
-def ingest_image_page(request: Request):
-    return templates.TemplateResponse("ingest_image.html", {
+@app.get("/ingest/voice", response_class=HTMLResponse)
+def ingest_voice_page(request: Request):
+    ffmpeg_ok = ffmpeg_available()
+    return templates.TemplateResponse("ingest_voice.html", {
         "request": request,
-        "breadcrumb": "Image Reports",
-        "next_page": {"url": "/dashboard", "label": "Dashboard"}
+        "breadcrumb": "Voice Reports",
+        "next_page": {"url": "/dashboard", "label": "Dashboard"},
+        "ffmpeg_available": ffmpeg_ok
     })
+
 
 # ---------- Health ----------
 
@@ -357,7 +359,15 @@ def ingest_voice_page(request: Request):
         if any(k in lower for k in ["cholera", "diarrhea", "diarrhoea"]):
             category, cat_weight = "waterborne_cholera", 0.4
         elif "typhoid" in lower:
-            category, cat_weight = "waterborne_typhoid", 0.35
+            category, cat_weight @app.get("/ingest/voice", response_class=HTMLResponse)
+def ingest_voice_page(request: Request):
+    ffmpeg_ok = ffmpeg_available()
+    return templates.TemplateResponse("ingest_voice.html", {
+        "request": request,
+        "breadcrumb": "Voice Reports",
+        "next_page": {"url": "/dashboard", "label": "Dashboard"},
+        "ffmpeg_available": ffmpeg_ok
+    })= "waterborne_typhoid", 0.35
         elif any(k in lower for k in ["flood", "river overflow", "contamination"]):
             category, cat_weight = "environmental_risk", 0.25
         else:
