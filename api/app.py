@@ -311,19 +311,19 @@ def ingest_voice_page(request: Request):
         "ffmpeg_available": ffmpeg_ok
     })
 
-@app.get("/ingest/test", response_class=HTMLResponse)
-def ingest_test_page(request: Request):
-    return templates.TemplateResponse("ingest_test.html", {
-        "request": request,
-        "breadcrumb": "Test Reports",
-        "next_page": {"url": "/dashboard", "label": "Dashboard"}
-    })
-
 @app.get("/ingest/image", response_class=HTMLResponse)
 def ingest_image_page(request: Request):
     return templates.TemplateResponse("ingest_image.html", {
         "request": request,
         "breadcrumb": "Image Reports",
+        "next_page": {"url": "/dashboard", "label": "Dashboard"}
+    })
+
+@app.get("/ingest/text", response_class=HTMLResponse)
+def ingest_text_page(request: Request):
+    return templates.TemplateResponse("ingest_text.html", {
+        "request": request,
+        "breadcrumb": "Text Reports",
         "next_page": {"url": "/dashboard", "label": "Dashboard"}
     })
 # ---------- Health ----------
