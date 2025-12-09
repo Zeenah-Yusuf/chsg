@@ -12,6 +12,7 @@ from fastapi.responses import JSONResponse, HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel, Field, validator
+from image_classifier import classify_image
 from starlette.middleware.sessions import SessionMiddleware
 from zoneinfo import ZoneInfo  # Python 3.9+
 LOCAL_TZ = ZoneInfo("Africa/Lagos")
